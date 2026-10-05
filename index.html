@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0b171b">
+  <link rel="icon" href="data:,">
+  <title>ことばバトル — WORD DUEL</title>
+  <link rel="stylesheet" href="battle-ui/styles/tokens.css">
+  <link rel="stylesheet" href="battle-ui/ui.css">
+  <link rel="stylesheet" href="battle-ui/styles/cards.css">
+  <link rel="stylesheet" href="battle-ui/styles/battle.css">
+  <script defer src="battle-ui/data.js"></script>
+  <script defer src="battle-ui/engine.js"></script>
+  <script defer src="battle-ui/presentation.js"></script>
+  <script defer src="battle-ui/view.js"></script>
+  <script defer src="battle-ui/effects.js"></script>
+  <script defer src="battle-ui/app.js"></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+  <header class="masthead">
+    <a class="brand" href="kotobattle-next.html" aria-label="ことばアーケードに戻る"><span class="brand-mark">言</span><span>ことばバトル<small>カード × じゃんけん</small></span></a>
+    <nav><button class="text-button" id="rulesButton">遊び方</button><button class="icon-button" id="settingsButton" aria-label="音と演出の設定">⚙</button></nav>
+  </header>
+  <main>
+    <section id="setupScreen" class="setup-screen">
+      <div class="intro"><div><h1>ことばバトル</h1><p class="intro-copy">あなたと相手のカードを3枚ずつ選ぶ</p></div><div class="arcade-rule"><b>じゃんけんバトル</b><span>勝ったカードが攻撃</span></div></div>
+      <div class="match-teams"><section class="team-panel" data-side="A" aria-labelledby="teamHeading"><div class="section-label"><h2 id="teamHeading"><span class="owner-tag you">YOU</span>あなたのチーム</h2><span>枠をタップして変更</span></div><div id="teamSlots" class="team-slots"></div><div class="team-tools"><button id="randomTeam" class="subtle-button">↻ おまかせ</button><button id="reorderTeam" class="subtle-button">並び替え</button><button id="saveTeam" class="subtle-button">保存</button><button id="loadTeam" class="subtle-button">読み込む</button></div></section>
+<section class="team-panel" data-side="B" aria-labelledby="opponentHeading"><div class="section-label"><h2 id="opponentHeading"><span class="owner-tag cpu">CPU</span>相手のチーム</h2><span>枠をタップして変更</span></div><div id="opponentSlots" class="team-slots"></div><div class="team-tools"><button id="randomOpponent" class="subtle-button">↻ おまかせ</button><button id="reorderOpponent" class="subtle-button">並び替え</button><button id="saveOpponent" class="subtle-button">保存</button><button id="loadOpponent" class="subtle-button">読み込む</button></div></section></div>
+      <section class="collection" aria-labelledby="collectionHeading"><p id="selectionTarget" class="selection-target" role="status">あなたの1枚目を選択中</p><div class="collection-heading"><div><p class="eyebrow">カード一覧</p><h2 id="collectionHeading">ことばを選ぶ <span>32</span></h2></div><label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="ことばを探す" aria-label="ことばを検索"></label></div><div id="typeFilters" class="filters" aria-label="タイプで絞り込む"></div><div id="wordGrid" class="word-grid"></div><p id="emptySearch" class="empty-search" hidden>そのことばは見つかりませんでした。</p></section>
+      <div class="setup-dock"><p class="match-summary"><span>あなたの3枚</span><b>VS</b><span>相手の3枚</span></p><button id="startBattle" class="primary-button">このチームで対戦 <span>↗</span></button></div>
+    </section>
+    <section id="battleScreen" class="battle-screen" hidden></section>
+    <section id="resultScreen" class="result-screen" hidden><p class="eyebrow">対戦結果</p><h1 id="resultTitle">YOU WIN</h1><p id="resultCopy"></p><div id="resultCards" class="result-cards"></div><div class="result-actions"><button id="rematchButton" class="primary-button">同じチームで再戦 ↗</button><button id="backToSetup" class="subtle-button">編成を変える</button><a href="kotobattle-next.html" class="text-button">アーケードへ</a></div></section>
+  </main>
+  <dialog id="panelDialog" class="panel-dialog"><div class="dialog-head"><p class="eyebrow" id="dialogLabel"></p><button id="closeDialog" class="icon-button" aria-label="閉じる">×</button></div><div id="dialogContent"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

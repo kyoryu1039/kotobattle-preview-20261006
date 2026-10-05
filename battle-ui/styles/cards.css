@@ -1,0 +1,94 @@
+@charset "UTF-8";
+/* Common card: rarity = outer metal frame + rank badge, type = inner band,
+   plate and icon. Internal sizes use container units so one component
+   works at battle, bench and list sizes. */
+[data-rank="S"]{--metal:var(--metal-rainbow);--metal-text:var(--text-rainbow);--metal-edge:#e9f6ff;--metal-glow:#9fe7ff66}
+[data-rank="A"]{--metal:var(--metal-gold);--metal-text:var(--text-gold);--metal-edge:#ffe9a3;--metal-glow:#ffcf4a40}
+[data-rank="B"]{--metal:var(--metal-silver);--metal-text:var(--text-silver);--metal-edge:#f4f7fb;--metal-glow:#dfe9f530}
+[data-rank="C"]{--metal:var(--metal-bronze);--metal-text:var(--text-bronze);--metal-edge:#ffcfa1;--metal-glow:#e0915030}
+[data-rank="D"]{--metal:var(--metal-iron);--metal-text:var(--text-iron);--metal-edge:#c7ced6;--metal-glow:#00000000}
+[data-rank="X"]{--metal:var(--metal-violet);--metal-text:var(--text-violet);--metal-edge:#f0c8ff;--metal-glow:#c070ff40}
+
+.ico{width:1em;height:1em;fill:currentColor;flex:0 0 auto;display:inline-block;vertical-align:-.14em}
+
+/* ---- Large card ---- */
+.kcard{position:relative;container-type:inline-size;width:100%;aspect-ratio:63/95;isolation:isolate;font-family:var(--font-ui);color:var(--text);user-select:none;-webkit-user-select:none}
+.kcard-frame{position:absolute;inset:0;border-radius:5.5cqw;padding:3.4cqw;background:var(--metal);
+  box-shadow:0 0 0 .7cqw #05090c,inset 0 0 0 .6cqw #ffffff88,inset 0 -1.2cqw 1.2cqw #0000004d,0 4cqw 7cqw #000000a6,0 0 7cqw var(--metal-glow)}
+.kcard-frame:before{content:"";position:absolute;inset:0;border-radius:inherit;background:url(../assets/img/sparkle.png) 0 0/22cqw;mix-blend-mode:screen;opacity:.55;pointer-events:none}
+.kcard[data-rank="S"] .kcard-frame:before{opacity:1;background:url(../assets/img/sparkle.png) 0 0/16cqw,repeating-linear-gradient(115deg,#ffffff00 0 6cqw,#ffffff38 7cqw,#ffffff00 8.5cqw)}
+.kcard[data-rank="D"] .kcard-frame:before{opacity:.3}
+.kcard-body{position:relative;height:100%;border-radius:3cqw;background:#081014;border:1.5cqw solid var(--type);
+  box-shadow:0 0 0 .6cqw #05090c,inset 0 0 0 .5cqw #ffffff30;display:flex;flex-direction:column;gap:1.6cqw;padding:0 0 1.8cqw;overflow:hidden}
+
+.kcard-art,.mini-art{position:relative;overflow:hidden;
+  background:url(../assets/img/mosaic.png) 0 0/48cqw,radial-gradient(ellipse 75% 70% at 50% 56%,color-mix(in srgb,var(--type) 92%,#fff 8%),color-mix(in srgb,var(--type) 62%,#02090c) 78%);
+  image-rendering:pixelated}
+.kcard-art{flex:1 1 auto;min-height:0}
+.kcard-art:after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 6cqw #000000a0;pointer-events:none}
+.art-pic{position:absolute;inset:0;display:block}
+.art-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+  transform:translate(var(--art-x,0),var(--art-y,0)) scale(var(--art-scale,1));
+  -webkit-mask-image:linear-gradient(90deg,#0000,#000 3%,#000 97%,#0000),linear-gradient(#0000,#000 3%,#000 97%,#0000);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,#0000,#000 3%,#000 97%,#0000),linear-gradient(#0000,#000 3%,#000 97%,#0000);mask-composite:intersect;
+  filter:drop-shadow(0 1.6cqw 1.2cqw #0008)}
+.kcard-art .art-pic{inset:14cqw 3cqw 1cqw}
+.art-fallback{position:absolute;inset:0;display:grid;place-items:center;font:400 30cqw/1 var(--font-title);color:#fff;text-shadow:0 1cqw 0 #0008}
+
+.kcard-type{position:absolute;left:2.4cqw;top:2.4cqw;z-index:2;display:flex;align-items:center;gap:1.6cqw;height:11.5cqw;padding:0 4.2cqw 0 0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--type) 70%,#fff 30%),var(--type) 45%,color-mix(in srgb,var(--type) 60%,#000));
+  border:.7cqw solid #05090c;border-radius:2cqw 5cqw 5cqw 2cqw;box-shadow:inset 0 .5cqw 0 #ffffff70,0 1cqw 1.6cqw #0007;
+  font-weight:900;font-size:7.2cqw;line-height:1;color:#fff;text-shadow:0 .5cqw 0 #000a,0 0 1cqw #0006;letter-spacing:.02em}
+.kcard-type .ico{width:11.5cqw;height:11.5cqw;padding:1.8cqw;margin:-.7cqw 0 -.7cqw -.7cqw;background:#081014;border:.7cqw solid var(--type);border-radius:2cqw;color:color-mix(in srgb,var(--type) 70%,#fff)}
+
+.kcard-name{margin:0 2.6cqw;padding:1.8cqw 2.6cqw;min-height:13cqw;display:grid;place-items:center;text-align:center;
+  background:linear-gradient(180deg,#ffffff,#e4e8ee 48%,#bcc4cf 52%,#dfe4ea);border:.8cqw solid #05090c;border-radius:2.4cqw;
+  box-shadow:inset 0 .5cqw 0 #fff,inset 0 -.6cqw 0 #8d97a4,0 1cqw 1.4cqw #0008}
+.kcard-name b{color:#0e151c;font-weight:900;font-size:min(9.1cqw,17px);line-height:1.12;letter-spacing:-.01em;word-break:keep-all;overflow-wrap:anywhere;word-break:auto-phrase;text-wrap:balance;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.kcard-name .name-part{display:inline-block;white-space:nowrap}
+.kcard-move{margin:0 2.6cqw;height:12.5cqw;display:flex;align-items:center;gap:2.4cqw;padding:0 3cqw;
+  background:linear-gradient(180deg,#1d2a36,#0b1218);border:.8cqw solid #05090c;border-radius:2.4cqw;box-shadow:inset 0 .5cqw 0 #ffffff1f,inset 0 0 0 .4cqw color-mix(in srgb,var(--type) 35%,transparent)}
+.kcard-move .ico{width:8.4cqw;height:8.4cqw;color:color-mix(in srgb,var(--type) 75%,#fff);filter:drop-shadow(0 0 1.2cqw color-mix(in srgb,var(--type) 70%,transparent))}
+.kcard-move b{flex:1;min-width:0;font-weight:900;font-size:min(7.6cqw,14px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;color:#f4f8fb}
+
+/* Rank badge (shared by large and mini cards). */
+.rank-badge{position:absolute;display:grid;place-items:center;filter:drop-shadow(0 .9cqw .8cqw #000c)}
+.rank-badge:before,.rank-badge:after{content:"";position:absolute;inset:0;clip-path:polygon(50% 0,100% 24%,100% 76%,50% 100%,0 76%,0 24%)}
+.rank-badge:before{background:var(--metal)}
+.rank-badge:after{inset:11%;background:radial-gradient(circle at 40% 30%,#26343d,#05090c 75%)}
+.rank-badge span{position:relative;z-index:1;font-family:var(--font-title);line-height:1;background:var(--metal-text);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:.03em #05090c}
+.kcard-rank{top:-2.6cqw;right:-2.6cqw;width:21cqw;height:24cqw;z-index:3}
+.kcard-rank span{font-size:14.5cqw;margin-top:-.6cqw}
+
+/* Interactive wrapper used in battle. */
+.card-hit{display:block;width:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer;border-radius:6%}
+.card-hit:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+
+/* ---- Mini card (bench, team slots) ---- */
+.mini{position:relative;container-type:inline-size;width:var(--mini-w,58px);aspect-ratio:58/66;padding:0;border:0;background:none;color:inherit;cursor:pointer;flex:0 0 auto}
+.mini-frame{position:absolute;inset:0;border-radius:8cqw;padding:5cqw;background:var(--metal);box-shadow:0 0 0 1px #05090c,inset 0 0 0 1px #ffffff80,0 3px 6px #0009}
+.mini-art{position:absolute;inset:5cqw 5cqw 27cqw;border-radius:4cqw;border:1px solid #05090c;background-size:64cqw,auto}
+.mini-art .art-pic{inset:6cqw}
+.mini-type{position:absolute;left:5cqw;right:5cqw;bottom:5cqw;height:21cqw;display:flex;align-items:center;justify-content:center;gap:3cqw;padding:0 3cqw;
+  background:linear-gradient(180deg,#1d2a36,#081014);border:1px solid #05090c;border-top:2px solid var(--type);border-radius:0 0 4cqw 4cqw;
+  font-weight:900;font-size:clamp(8px,14cqw,11px);letter-spacing:-.08em;line-height:1;color:#fff;white-space:nowrap;overflow:visible}
+.mini-type .ico{width:15cqw;height:15cqw;color:color-mix(in srgb,var(--type) 75%,#fff)}
+.mini-rank{top:-5cqw;right:-6cqw;width:28cqw;height:32cqw;z-index:2}
+.mini-rank span{font-size:19cqw}
+.mini-hp{position:absolute;left:8cqw;right:8cqw;bottom:-9cqw;height:5px;border-radius:3px;background:#03080b;box-shadow:0 0 0 1px #2a3d44;overflow:hidden}
+.mini-hp i{display:block;height:100%;background:var(--hp-fill-color,var(--hp-high));transform-origin:left}
+[data-level="high"]{--hp-fill-color:var(--hp-high)}
+[data-level="mid"]{--hp-fill-color:var(--hp-mid)}
+[data-level="low"]{--hp-fill-color:var(--hp-low)}
+.mini[data-dead] .mini-frame,.mini[data-dead] .mini-rank{filter:grayscale(1) brightness(.45)}
+.mini-down{position:absolute;left:-4cqw;right:-4cqw;top:36%;z-index:3;padding:2px 0;text-align:center;font-weight:900;font-size:max(9px,15cqw);color:#fff;background:#b3121bdd;transform:rotate(-10deg);box-shadow:0 2px 4px #0008}
+.mini:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:6px}
+
+/* Card list sizes */
+.kcard-md .kcard-frame{box-shadow:0 0 0 .7cqw #05090c,inset 0 0 0 .6cqw #ffffff88,0 3cqw 5cqw #0009}
+@media (prefers-reduced-motion:no-preference){
+  .kcard[data-rank="S"] .kcard-frame:before{animation:foil 5s linear infinite}
+  body.motion-reduced .kcard[data-rank="S"] .kcard-frame:before{animation:none}
+}
+@keyframes foil{from{background-position:0 0,0 0}to{background-position:16cqw 16cqw,60cqw 0}}

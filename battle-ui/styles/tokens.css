@@ -1,0 +1,52 @@
+@charset "UTF-8";
+/* Design tokens: fonts, colours, metals, motion. Shared by every screen. */
+@font-face{font-family:"KB Dela";src:url(../assets/fonts/DelaGothicOne-subset.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"KB Noto";src:url(../assets/fonts/NotoSansJP-700-subset.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"KB Noto";src:url(../assets/fonts/NotoSansJP-900-subset.woff2) format("woff2");font-weight:900;font-display:swap}
+@font-face{font-family:"KB Barlow";src:url(../assets/fonts/BarlowCondensed-800-subset.woff2) format("woff2");font-weight:800;font-display:swap}
+
+:root{
+  --font-title:"KB Dela","Dela Gothic One","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --font-ui:"KB Noto","Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  --font-num:"KB Barlow","Barlow Condensed","Arial Narrow","KB Noto",sans-serif;
+
+  --ink:#081014;--arena:#0b171b;--text:#f3f7f8;--muted:#9fb3b8;--line:#7fb6c233;
+  --panel:linear-gradient(180deg,#152329f2,#0b1519f2);
+  --panel-edge:#3f5e66;--panel-hi:#9cc6cf40;
+  --gold:#ffd04a;--gold-deep:#b77a08;
+  --you:#2f7cf6;--cpu:#e5322d;
+  --hp-you:linear-gradient(180deg,#8cff9e,#22d154 45%,#119338);
+  --hp-cpu:linear-gradient(180deg,#ff9b85,#f0442c 45%,#a8180f);
+  --hp-high:linear-gradient(180deg,#a5ffae,#35d35b 45%,#13953c);
+  --hp-mid:linear-gradient(180deg,#fff5a8,#ffd033 45%,#c78b05);
+  --hp-low:linear-gradient(180deg,#ffb39e,#f24b36 45%,#bd201f);
+  --hp-ghost:#ffe08a;
+  --atk:linear-gradient(90deg,#b5160f,#ff4a32);--def:linear-gradient(90deg,#1650c8,#3aa0ff);--eva:linear-gradient(90deg,#0f8a3a,#2fe36a);
+  --atk-ico:#ff4a3a;--def-ico:#3c9bff;--eva-ico:#2fe36a;
+  --buff:#5ff08a;--guard:#7cc4ff;--debuff:#c69bff;
+
+  /* Rarity metals. Each pairs a frame gradient with a text gradient. */
+  --metal-gold:linear-gradient(135deg,#fff4b8 0%,#f0bb3c 16%,#8f5c0c 33%,#f7d566 50%,#fff8cf 56%,#bb8318 74%,#f3c95a 90%,#8f5c0c 100%);
+  --metal-silver:linear-gradient(135deg,#ffffff 0%,#ccd4de 16%,#6c7888 33%,#e8edf3 50%,#ffffff 56%,#8c97a6 74%,#dce2ea 90%,#6c7888 100%);
+  --metal-bronze:linear-gradient(135deg,#ffd9b4 0%,#d0803f 16%,#6b3112 33%,#e7a467 50%,#ffd6a8 56%,#934c21 74%,#dc9158 90%,#6b3112 100%);
+  --metal-iron:linear-gradient(135deg,#c9d0d8 0%,#76808c 16%,#363c44 33%,#949eaa 50%,#c2cad3 56%,#4e555e 74%,#87909b 90%,#363c44 100%);
+  --metal-violet:linear-gradient(135deg,#f5dcff 0%,#bc66f0 16%,#4a1576 33%,#d996ff 50%,#f8e3ff 56%,#6d2aa1 74%,#c77df5 90%,#4a1576 100%);
+  --metal-rainbow:linear-gradient(115deg,#ffffff00 30%,#ffffffb0 46%,#ffffff00 58%),conic-gradient(from 200deg at 40% 45%,#ff6fa5,#ffd36b,#9dff9a,#5fe3ff,#8f9dff,#e88bff,#ff6fa5);
+  --text-gold:linear-gradient(180deg,#fff7c6 0%,#ffd75a 40%,#d08d0e 62%,#ffe58c 100%);
+  --text-silver:linear-gradient(180deg,#ffffff 0%,#dfe6ee 40%,#8693a3 62%,#f2f5f8 100%);
+  --text-bronze:linear-gradient(180deg,#ffe2c4 0%,#f0a565 40%,#9b5121 62%,#ffcf9c 100%);
+  --text-iron:linear-gradient(180deg,#eef1f4 0%,#b4bcc6 40%,#5d6670 62%,#d2d8de 100%);
+  --text-violet:linear-gradient(180deg,#fbeaff 0%,#e3a6ff 40%,#8b37c4 62%,#f1c9ff 100%);
+  --text-rainbow:linear-gradient(180deg,#fff 0%,#ffe27a 22%,#ff86c0 42%,#a58cff 62%,#62e6ff 82%,#b6ffb0 100%);
+
+  /* Motion. --fx-speed is 1 for standard and .5 for fast. */
+  --fx-speed:1;--ease-out:cubic-bezier(.2,.8,.2,1);--ease-snap:cubic-bezier(.3,1.4,.5,1);
+  color-scheme:dark;
+}
+body.speed-fast{--fx-speed:.5}
+*,*:before,*:after{box-sizing:border-box}
+body{margin:0;background:var(--arena);color:var(--text);font-family:var(--font-ui)}
+button,input,select{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+.svg-defs{position:absolute;width:0;height:0;overflow:hidden}
