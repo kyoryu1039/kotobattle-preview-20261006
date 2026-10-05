@@ -37,8 +37,9 @@
   }
 
   function mini(u, i, {dead = false, label = ''} = {}) {
-    return `<button class="mini" type="button" data-bench="${i}" data-level="${P.hpLevel(u.hp,u.maxhp)}" data-rank="${u.rank}" style="--type:${u.color}" ${dead ? 'data-dead="true"' : ''} aria-label="${escape(label || u.name)} HP ${u.hp} / ${u.maxhp}${dead ? ' 戦闘不能' : ''}">
-      <span class="mini-frame"><span class="mini-art">${picture(u)}</span><span class="mini-type"><span>${escape(u.type)}</span></span></span>
+    const typeShort={'ヒストリー':'歴史','ジオ':'地理','コンセプト':'概念','サイエンス':'科学','アニマル':'動物','ヒューマン':'人物','フード':'食'};
+    return `<button class="mini" type="button" data-bench="${i}" data-level="${P.hpLevel(u.hp,u.maxhp)}" data-rank="${u.rank}" style="--type:${u.color}" ${dead ? 'data-dead="true"' : ''} aria-label="${escape(label || u.name)} ${escape(u.type)} HP ${u.hp} / ${u.maxhp}${dead ? ' 戦闘不能' : ''}">
+      <span class="mini-frame"><span class="mini-art">${picture(u)}</span><span class="mini-type" title="${escape(u.type)}"><span>${escape(typeShort[u.type]||u.type)}</span></span></span>
       <span class="mini-rank rank-badge" data-rank="${u.rank}"><span>${u.rank}</span></span>
       <span class="mini-hp" aria-hidden="true"><i style="transform:scaleX(${pct(u.hp, u.maxhp)})"></i></span>
       ${dead ? '<span class="mini-down">戦闘不能</span>' : ''}
@@ -81,7 +82,6 @@
           <div class="hp-block" id="enemyHp"></div>
           <div class="stat-panel" id="enemyStats"></div>
           <div class="status-row" id="enemyStatus" aria-label="相手の状態"></div>
-          <div class="bench-panel"><span class="bench-label">控え</span><div class="bench" id="enemyBench"></div></div>
         </div>
         <div class="card-slot enemy" id="enemyCard"></div>
       </section>
@@ -89,6 +89,7 @@
       <section class="side side-ally" aria-label="あなた">
         <div class="card-slot ally" id="allyCard"></div>
         <div class="side-info">
+          <button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る"><span>✦ <b id="allySkillName">必殺技</b></span><small>技を見る ›</small></button>
           <div class="stat-panel" id="allyStats"></div>
           <div class="status-row" id="allyStatus" aria-label="あなたの状態"></div>
           <div class="bench-panel"><span class="bench-label">控え</span><div class="bench" id="allyBench"></div>
@@ -139,10 +140,11 @@
         slot.querySelector('button').onclick = () => onDetail(side, state[side].index);
         imageFallbacks(slot);
         $(n + 'Stats').innerHTML = stats(w);
-        const owner = side === 'A' ? '<span class="owner-tag you">YOU</span>' : '<span class="owner-tag cpu">CPU</span>';
+        const owner = side === 'A' ? '<span class="owner-tag you">あなた</span>' : '<span class="owner-tag cpu">相手 CPU</span>';
         $(n + 'Hp').innerHTML = `<div class="hp-head">${owner}<b class="hp-name">${escape(w.name)}</b></div>
           <div class="hp-line"><span class="hp-num" aria-label="HP"><b class="hp-cur"></b><span class="hp-sep">/</span><span class="hp-max">${w.maxhp}</span></span>
           <span class="hp-bar" data-side="${n}"><i class="hp-ghost"></i><i class="hp-fill"></i></span></div>`;
+        if(side==='A')$('allySkillName').textContent=w.skill[0];
         instant = true;
       }
       const hp = $(n + 'Hp'), ratio = pct(w.hp, w.maxhp);
@@ -154,12 +156,14 @@
       }
       const st = statuses(w);
       if (once(n + 'status', st)) $(n + 'Status').innerHTML = st;
-      const benchHtml = state[side].team.map((u, i) => i === state[side].index ? '' : mini(u, i, {dead: u.hp <= 0})).join('');
-      if (once(n + 'bench', benchHtml)) {
-        const bench = $(n + 'Bench');
-        bench.innerHTML = benchHtml;
-        imageFallbacks(bench);
-        bench.querySelectorAll('[data-bench]').forEach(b => b.onclick = () => onDetail(side, +b.dataset.bench));
+      if(side==='A'){
+        const benchHtml = state[side].team.map((u, i) => i === state[side].index ? '' : mini(u, i, {dead: u.hp <= 0})).join('');
+        if (once(n + 'bench', benchHtml)) {
+          const bench = $(n + 'Bench');
+          bench.innerHTML = benchHtml;
+          imageFallbacks(bench);
+          bench.querySelectorAll('[data-bench]').forEach(b => b.onclick = () => onDetail(side, +b.dataset.bench));
+        }
       }
     }
 
@@ -185,9 +189,9 @@
       skill.disabled = !ui.skillEnabled;
       skill.dataset.state = ui.armed ? 'armed' : ready ? 'ready' : 'charging';
       skill.setAttribute('aria-pressed', String(!!ui.armed));
-      skill.setAttribute('aria-label', ui.armed ? `必殺技を予約中。押すと解除。ゲージ ${sp}/6` : ready ? `必殺技を予約する。ゲージ ${sp}/6` : `必殺技ゲージ ${sp}/6`);
-      $('skillTitle').textContent = ui.armed ? '必殺予約中' : '必殺技';
-      $('skillHint').textContent = ui.armed ? '次の勝利で発動' : ready ? 'タップで予約' : 'ゲージをためる';
+      skill.setAttribute('aria-label', ui.armed ? `必殺技ON。次の勝利で発動。押すとOFF。ゲージ ${sp}/6` : ready ? `必殺技をONにする。ゲージ ${sp}/6` : `必殺技ゲージ ${sp}/6`);
+      $('skillTitle').textContent = ui.armed ? '必殺技 ON！' : ready ? '必殺技をON' : '必殺技';
+      $('skillHint').textContent = ui.armed ? '次の勝利で発動' : ready ? 'タップしてON' : `あと${6-sp}で使える`;
       $('gaugeLabel').innerHTML = `<b>${sp}</b><small>/6</small>`;
       const pips = Array.from({length: 6}, (_, i) => `<i class="${i < sp ? 'on' : ''}"></i>`).join('');
       if (once('pips', pips)) $('gaugeTrack').innerHTML = pips;

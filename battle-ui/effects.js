@@ -23,8 +23,23 @@
       view.root.querySelectorAll('[data-attacking]').forEach(el=>delete el.dataset.attacking);
       view.root.querySelectorAll('[data-status-flash]').forEach(el=>delete el.dataset.statusFlash);
       view.root.querySelectorAll('[data-dodging]').forEach(el=>delete el.dataset.dodging);
+      view.root.querySelectorAll('[data-entering]').forEach(el=>delete el.dataset.entering);
     }
     function position(side) {const b=view.cardEl(side).getBoundingClientRect(),r=$('duelStage').getBoundingClientRect();return {x:b.left+b.width/2-r.left,y:b.top+b.height*.5-r.top};}
+    async function enter(side,token=current()) {
+      if(!alive(token))return;
+      const target=view.cardEl(side),p=position(side),node=document.createElement('div');
+      node.className='entry-fx';node.dataset.side=side;node.style.cssText=`--x:${p.x}px;--y:${p.y}px`;
+      node.innerHTML='<i class="entry-beam"></i><i class="entry-ring"></i><i class="entry-glow"></i>';
+      layer.append(node);target.dataset.entering='true';
+      try{
+        if(options.reduced)await hold(1000,token);
+        else await Promise.all([
+          animate(node,[{opacity:0,transform:'translate(-50%,-50%) scale(.45)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1.08)',offset:.74},{opacity:0,transform:'translate(-50%,-50%) scale(1.35)'}],options.speed===2?2600:1450,token),
+          animate(target,[{filter:'brightness(1.8) saturate(1.5)'},{filter:'brightness(1.3) saturate(1.25)',offset:.35},{filter:'brightness(1)'}],900,token)
+        ]);
+      }finally{node.remove();if(alive(token))delete target.dataset.entering;}
+    }
     async function impact(side,{heal=false,amount=null,label='',family='strike',special=false}={},token=current()) {
       if(!alive(token))return;
       const p=position(side),color=heal?'#5dff9d':family==='debuff'?'#cf8cff':family==='guard'?'#70cdff':'#ffe598';
@@ -105,7 +120,7 @@
         ]);
       }finally{node.remove();if(alive(token))delete root.dataset.dodging;}
     }
-    return {animate,wait,cancel,impact,reveal,statusEffect,cutIn,attack,miss,activeCount:()=>animations.size+delays.size};
+    return {animate,wait,hold,cancel,impact,reveal,statusEffect,cutIn,attack,miss,enter,activeCount:()=>animations.size+delays.size};
   }
   globalThis.KotoEffects={create};
 })();

@@ -52,3 +52,42 @@ body{min-width:320px;font-weight:700}button,a,input,select{touch-action:manipula
 .result-screen.screen-enter h1{animation:result-arrive 550ms cubic-bezier(.15,.85,.2,1)}
 body.motion-reduced .result-screen h1{animation:none}
 @media(prefers-reduced-motion:reduce){.result-screen h1{animation:none!important}}
+
+/* Compact tap-first team setup. The three chosen cards stay in sight while
+   the player scrolls the gallery; the opponent is randomized at battle start. */
+.setup-screen{max-width:1040px;padding-top:16px;padding-bottom:116px}
+.intro{margin-bottom:12px}.intro h1{font-size:24px;line-height:1.2}.intro-copy{margin-top:3px;font-size:12px}
+.cpu-note{display:flex;align-items:center;gap:8px;font-size:12px;color:#dce9ec;white-space:nowrap}
+.cpu-note .owner-tag{font-size:12px}.cpu-note b{font-weight:900}
+.setup-screen>.team-panel{position:sticky;top:0;z-index:6;margin:0 0 14px;padding:10px 12px 8px;border:1px solid #527c96;border-top:3px solid #71b8ff;background:#101e25f7;backdrop-filter:blur(16px)}
+.setup-screen .section-label{margin-bottom:8px}.setup-screen .section-label h2{display:flex;align-items:center;gap:8px;font-size:15px}
+.setup-screen .section-label .subtle-button{min-height:34px;padding:5px 10px;white-space:nowrap;font-size:11px}
+.setup-screen .team-slots{gap:8px}.setup-screen .team-slot{height:94px;min-height:0;display:flex;flex-direction:row;gap:6px;padding:14px 8px 6px;background:linear-gradient(140deg,color-mix(in srgb,var(--type) 20%,#0e2028),#071014);border:2px solid #385565;text-align:left}
+.setup-screen .team-slot.selected{padding:14px 8px 6px;border-color:#ffd96f;box-shadow:0 0 0 2px #ffd96f44,0 0 18px #ffd04a38}
+.setup-screen .slot-no{top:3px;left:6px;font-size:10px;line-height:1.1;letter-spacing:.02em}
+.setup-screen .slot-art{width:66px;height:56px;flex:0 0 auto}.setup-screen .slot-art img{width:100%;height:100%}
+.setup-screen .slot-copy{min-width:0}.setup-screen .slot-copy b{font-size:12px;line-height:1.25;overflow-wrap:anywhere}.setup-screen .slot-copy small{margin-top:4px;font-size:10px;line-height:1.2}
+.team-help{margin-top:7px;font-size:11px;color:#d2e4e8;text-align:center}
+.selection-target{margin-bottom:8px;padding:7px 10px;font-size:12px}.collection{scroll-margin-top:190px}
+.collection-heading{margin-bottom:8px}.collection-heading h2{font-size:18px}.collection-heading h2 span{font-size:20px}
+.filters{padding-bottom:8px}.filter{min-height:34px;padding:5px 9px;font-size:11px}
+.word-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:16px 12px;padding:2px}
+.word-entry{text-align:center}.word-entry:hover{transform:none}.word-entry.in-team:after{content:none}
+.word-pick{display:block;position:relative;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left}
+.word-pick:focus-visible,.word-more:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.word-pick .kcard{width:100%}.word-pick:active{transform:scale(.96)}
+.chosen-badge{position:absolute;z-index:4;left:1px;top:2px;padding:2px 4px;border:1px solid #c6e8ff;border-radius:3px;background:#145fa5;color:#fff;font-size:9px;line-height:1.1;white-space:nowrap}
+.word-entry .entry-footer{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:3px;margin:4px 0 0;color:#e6f0f3;font-size:10px;line-height:1.25;text-align:left}
+.word-entry .entry-footer span:first-child{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:25px}
+.word-more{min-width:32px;min-height:26px;padding:2px 3px;border:1px solid #68848f;border-radius:4px;background:#0c202a;color:#dbe9ed;font-size:10px}
+.setup-dock{gap:16px;padding:8px 16px max(8px,env(safe-area-inset-bottom))}.setup-dock>.primary-button{width:260px;min-height:46px}
+@media(max-width:620px){
+  .setup-screen{padding:10px 10px 98px}.intro{align-items:flex-start;gap:7px}.intro h1{font-size:21px}.intro-copy{font-size:11px}.cpu-note{align-items:flex-end;flex-direction:column;gap:3px;font-size:9px}.cpu-note .owner-tag{font-size:10px;padding:3px 6px}
+  .setup-screen>.team-panel{padding:8px 8px 6px;margin-bottom:10px}.setup-screen .section-label{margin-bottom:7px}.setup-screen .section-label h2{font-size:13px}.setup-screen .section-label .subtle-button{min-height:32px;padding:4px 7px;font-size:10px}
+  .setup-screen .team-slots{gap:5px}.setup-screen .team-slot{height:108px;min-height:0;flex-direction:column;align-items:center;gap:1px;padding:16px 3px 3px;text-align:center}
+  .setup-screen .team-slot.selected{padding:16px 3px 3px}.setup-screen .slot-art{width:72px;height:49px}.setup-screen .slot-copy b{font-size:10px;line-height:1.15;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.setup-screen .slot-copy small{font-size:8px;margin-top:2px}
+  .team-help{font-size:10px;margin-top:5px}.collection{scroll-margin-top:166px}.collection-heading{gap:8px}.collection-heading h2{font-size:16px}.search-box{width:135px}.search-box input{font-size:11px}.filter{min-height:30px;padding:4px 7px;font-size:10px}
+  .word-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 6px;padding:2px}.word-entry .entry-footer{font-size:9px}.word-more{min-width:29px;font-size:9px}
+  .setup-dock{flex-direction:row;padding:7px 10px max(9px,env(safe-area-inset-bottom))}.setup-dock .match-summary{display:none}.setup-dock>.primary-button{width:100%;max-width:420px;min-height:46px}
+}
+@media(max-width:350px){.word-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.cpu-note b{display:none}}

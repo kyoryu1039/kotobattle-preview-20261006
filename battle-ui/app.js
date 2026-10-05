@@ -6,12 +6,13 @@
   const options={...defaults,...storage.get('settings',{})};
   for(const k of ['bgm','se'])options[k]=Math.max(0,Math.min(1,Number(options[k])||0));
   options.speed=options.speed===2?2:1;
-  let team=[0,2,3],cpu=randomTeam(),editingSide='A',slot=0,filter='all',state=null,screen='setup',phase='idle',armed=false,epoch=0,timer=null,cpuTimer=null,timeLeft=15,cpuChecked=false,log=[],dialogReturn=null,forcedResolve=null,toastTimer,messageTimer;
+  let team=storage.get('currentTeam',[0,2,3]),cpu=[],slot=0,filter='all',state=null,screen='setup',phase='idle',armed=false,epoch=0,timer=null,cpuTimer=null,timeLeft=15,cpuChecked=false,log=[],dialogReturn=null,forcedResolve=null,toastTimer,messageTimer;
+  if(!Array.isArray(team)||team.length!==3||new Set(team).size!==3||team.some(id=>!D.WORDS[id]))team=[0,2,3];
   const voices=new Set();
   KotoPresent.installSprite();
   const battleView=V.createBattleView($('battleScreen'),{onDetail(side,index){if(phase==='input'&&!$('panelDialog').open)openDetail(state[side].team[index]);}});
   const fx=KotoEffects.create({view:battleView,options,current:()=>epoch,sound,tone});
-  const {animate,wait,impact,reveal,statusEffect}=fx;
+  const {animate,wait,hold,impact,reveal,statusEffect,enter}=fx;
   const audio={bgm:new Audio('audio/Hypnagogiaondo.mp3'),hit:new Audio('audio/hit.mp3'),skill:new Audio('audio/skill.mp3'),ko:new Audio('audio/ko.mp3')};
   audio.bgm.loop=true;audio.bgm.preload='none';
   for(const a of Object.values(audio))a.preload='none';
@@ -25,30 +26,27 @@
   function sound(kind){const a=audio[kind];if(!a||!options.se)return;const copy=a.cloneNode();copy.volume=options.se;voices.add(copy);copy.play().catch(()=>voices.delete(copy));copy.onended=()=>voices.delete(copy);}
   function music(){audio.bgm.volume=options.bgm;if(options.bgm)audio.bgm.play().catch(()=>{});else audio.bgm.pause();}
   function toast(text){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2300);}
-  function statBars(w){
-    const rows=[['HP',w.hp??w.maxhp,800,'hp'],['攻撃',w.atk,120,'atk'],['防御',w.def,120,'def'],['回避',w.eva,30,'eva']];
-    return '<div class="card-stats">'+rows.map(([label,value,max,key])=>'<div class="card-stat stat-'+key+'" aria-label="'+label+' '+value+(key==='eva'?'%':'')+'"><span>'+label+'</span><div class="stat-track"><i style="width:'+Math.max(0,Math.min(100,value/max*100))+'%"></i></div><b>'+value+(key==='eva'?'%':'')+'</b></div>').join('')+'</div>';
-  }
   function card(w){return V.card(w,{size:'md'});}
   function imageFallbacks(root){V.imageFallbacks(root);}
-  const teamFor=side=>side==='A'?team:cpu;
-  const teamLabel=side=>side==='A'?'あなた':'相手';
-  function selectSlot(side,index){editingSide=side;slot=index;tone();renderSetup();document.querySelector('.collection').scrollIntoView({behavior:options.reduced?'auto':'smooth',block:'start'});}
+  function selectSlot(index){slot=index;tone();renderSetup();}
+  function setWord(id){
+    const old=team.indexOf(id),selected=slot;
+    if(old!==-1&&old!==selected)[team[old],team[selected]]=[team[selected],team[old]];
+    else team[selected]=id;
+    storage.set('currentTeam',team);slot=(slot+1)%3;tone('place');renderSetup();
+  }
   function renderSetup(){
-    for(const [side,rootId] of [['A','teamSlots'],['B','opponentSlots']]){
-      const root=$(rootId);root.innerHTML=teamFor(side).map((id,i)=>{const w=D.WORDS[id],selected=editingSide===side&&slot===i;return `<button class="team-slot ${selected?'selected':''}" data-slot="${i}" data-side="${side}" data-rank="${w.rank}" style="--type:${w.color}" aria-pressed="${selected}" aria-label="${teamLabel(side)}の${i+1}枚目 ${escape(w.name)} を入れ替える"><span class="slot-no">0${i+1}</span><span class="slot-art">${V.picture(w)}</span><span class="slot-copy"><b>${escape(w.name)}</b><small><i style="background:${w.color}"></i>${w.type} / ${w.rank}</small></span><span class="slot-edit">変更</span></button>`;}).join('');
-      root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>selectSlot(side,+b.dataset.slot));imageFallbacks(root);
-      root.closest('.team-panel').dataset.editing=String(editingSide===side);
-    }
-    $('selectionTarget').textContent=`${teamLabel(editingSide)}の${slot+1}枚目を選択中`;
-    $('selectionTarget').dataset.side=editingSide;
+    const root=$('teamSlots');root.innerHTML=team.map((id,i)=>{const w=D.WORDS[id],selected=slot===i;return `<button class="team-slot ${selected?'selected':''}" data-slot="${i}" data-rank="${w.rank}" style="--type:${w.color}" aria-pressed="${selected}" aria-label="${i+1}枚目 ${escape(w.name)} を変更"><span class="slot-no">${i===0?'先頭':'控え '+i}</span><span class="slot-art">${V.picture(w)}</span><span class="slot-copy"><b>${escape(w.name)}</b><small>${escape(w.type)} · ${w.rank}</small></span></button>`;}).join('');
+    root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.slot));imageFallbacks(root);
+    $('selectionTarget').textContent=`${slot+1}枚目にセットするカードを選ぶ`;
     renderGrid();
   }
   function renderGrid(){
     const q=$('searchInput').value.trim(),kana=q.replace(/[ぁ-ん]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));const list=D.WORDS.filter(w=>(filter==='all'||w.type===filter)&&(!q||w.name.includes(q)||w.yomi.includes(kana)||w.skill[0].includes(q)));
-    $('wordGrid').innerHTML=list.map(w=>`<button class="word-entry ${teamFor(editingSide).includes(w.id)?'in-team':''}" data-word="${w.id}" aria-label="${escape(w.name)} 詳細を見る">${card(w)}${statBars(w)}<div class="entry-footer"><span>${escape(w.skill[0])}</span><span>↗</span></div></button>`).join('');
+    $('wordGrid').innerHTML=list.map(w=>{const chosen=team.indexOf(w.id);return `<div class="word-entry ${chosen>=0?'in-team':''}" data-word="${w.id}"><button class="word-pick" data-pick="${w.id}" type="button" aria-label="${escape(w.name)}を${slot+1}枚目にセット">${card(w)}${chosen>=0?`<span class="chosen-badge">${chosen+1}枚目</span>`:''}</button><div class="entry-footer"><span>${escape(w.name)}</span><button class="word-more" data-detail="${w.id}" type="button" aria-label="${escape(w.name)}の詳細を見る">詳細</button></div></div>`;}).join('');
     $('emptySearch').hidden=list.length>0;imageFallbacks($('wordGrid'));
-    $('wordGrid').querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>openDetail(D.WORDS[+b.dataset.word],true));
+    $('wordGrid').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>setWord(+b.dataset.pick));
+    $('wordGrid').querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetail(D.WORDS[+b.dataset.detail],true));
   }
   function filters(){
     $('typeFilters').innerHTML=['all',...D.TYPES_RING].map(t=>`<button class="filter ${filter===t?'active':''}" aria-pressed="${filter===t}" data-type="${t}" style="--card-color:${D.COLORS[t]||'var(--gold)'}">${t==='all'?'すべて':`<span class="filter-dot"></span>${t}`}</button>`).join('');
@@ -63,18 +61,8 @@
   function closePanel(){if($('panelDialog').dataset.forced==='true')return;$('panelDialog').close();}
   function openDetail(w,editable=false){
     tone();const hp=w.hp??w.maxhp;
-    openPanel('CARD DETAILS',`<div class="detail-top">${card(w)}<div><h2>${escape(w.name)}</h2><p>${w.type} / RANK ${w.rank}</p></div></div><div class="detail-stats">${[['HP',hp],['攻撃',w.atk],['防御',w.def],['回避',w.eva+'%']].map(([k,v])=>`<div class="detail-stat"><small>${k}</small><b>${v}</b></div>`).join('')}</div><div class="skill-description"><h3>✦ ${escape(w.skill[0])}</h3>${escape(w.skill[1])}</div>${editable?`<div class="dialog-actions"><button id="addToTeam" class="primary-button">${teamLabel(editingSide)}の${slot+1}枚目にセット <span>＋</span></button><button id="moveSlot" class="subtle-button">入れる場所を変更</button></div>`:''}`);
-    if(editable){$('addToTeam').onclick=()=>{teamFor(editingSide)[slot]=w.id;slot=(slot+1)%3;tone('place');renderSetup();closePanel();toast(`${w.name}を${teamLabel(editingSide)}のチームにセットしました`);};$('moveSlot').onclick=()=>{slot=(slot+1)%3;renderSetup();$('addToTeam').firstChild.textContent=`${teamLabel(editingSide)}の${slot+1}枚目にセット `;};}
-  }
-  function savedTeams(save,side='A'){
-    const key=side==='A'?'teams':'opponentTeams',saved=storage.get(key,[null,null,null]);
-    openPanel(save?'SAVE TEAM':'SAVED TEAMS',`<h2>${teamLabel(side)}の編成を${save?'保存':'読み込む'}</h2>${[0,1,2].map(i=>`<button class="switch-choice" data-save="${i}"><span><b>編成 ${i+1}</b><small>${Array.isArray(saved[i])?saved[i].map(id=>D.WORDS[id]?.name||'').join(' / '):'まだ保存されていません'}</small></span></button>`).join('')}`);
-    $('dialogContent').querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{const i=+b.dataset.save;if(save){saved[i]=[...teamFor(side)];storage.set(key,saved);toast(`${teamLabel(side)}の編成 ${i+1} に保存しました`);}else{if(!Array.isArray(saved[i])||saved[i].length!==3||saved[i].some(id=>!D.WORDS[id])){toast('この枠には編成がありません');return;}if(side==='A')team=[...saved[i]];else cpu=[...saved[i]];renderSetup();}closePanel();});
-  }
-  function reorderTeam(side='A'){
-    const list=teamFor(side);
-    openPanel('TEAM ORDER',`<h2>${teamLabel(side)}の出場順</h2><p class="panel-copy">1枚目が最初に場へ出ます。</p>${list.map((id,i)=>`<div class="order-row"><span>${i+1}. ${escape(D.WORDS[id].name)}</span><button class="icon-button" data-up="${i}" ${i===0?'disabled':''} aria-label="${escape(D.WORDS[id].name)}をひとつ前へ">↑</button><button class="icon-button" data-down="${i}" ${i===2?'disabled':''} aria-label="${escape(D.WORDS[id].name)}をひとつ後ろへ">↓</button></div>`).join('')}`);
-    for(const [key,dir] of [['up',-1],['down',1]])$('dialogContent').querySelectorAll(`[data-${key}]`).forEach(b=>b.onclick=()=>{const i=+b.dataset[key];[list[i],list[i+dir]]=[list[i+dir],list[i]];renderSetup();reorderTeam(side);tone('place');});
+    openPanel('CARD DETAILS',`<div class="detail-top">${card(w)}<div><h2>${escape(w.name)}</h2><p>${w.type} / RANK ${w.rank}</p></div></div><div class="detail-stats">${[['HP',hp],['攻撃',w.atk],['防御',w.def],['回避',w.eva+'%']].map(([k,v])=>`<div class="detail-stat"><small>${k}</small><b>${v}</b></div>`).join('')}</div><div class="skill-description"><h3>✦ ${escape(w.skill[0])}</h3>${escape(w.skill[1])}</div>${editable?`<div class="dialog-actions"><button id="addToTeam" class="primary-button">${slot+1}枚目にセット <span>＋</span></button></div>`:''}`);
+    if(editable)$('addToTeam').onclick=()=>{setWord(w.id);closePanel();};
   }
   function applySettings(){document.body.classList.toggle('motion-reduced',options.reduced);document.body.classList.toggle('speed-fast',options.speed===2);}
   function openSettings(){
@@ -83,7 +71,7 @@
     ['bgmRange','seRange','speedSelect','reducedCheck'].forEach(id=>$(id).oninput=save);
     if($('historyButton'))$('historyButton').onclick=openHistory;
   }
-  function openRules(){openPanel('HOW TO PLAY',`<h2>遊び方</h2><div class="panel-copy"><p><strong>1. チームを組む</strong><br>カードをタップし、3つの枠にセット。先頭から出場します。</p><p><strong>2. じゃんけんで攻撃権を決める</strong><br>勝てばあなたが攻撃、負ければ相手が攻撃。あいこは攻撃せず、必殺ゲージが進みます。</p><p><strong>3. ゲージ6で必殺予約</strong><br>「必殺技」を押して予約。次にじゃんけんに勝ったとき発動します。予約はもう一度押すと解除できます。</p><p><strong>4. 相性と交代を使う</strong><br>有利な相手には×1.5、不利なら×0.67。自主交代はゲージが0になり、相手の攻撃を受けます。</p><p><strong>5. 相手の3枚を倒せば勝利</strong><br>HPが0になったら交代。残りのカードがなくなったチームの負けです。</p><p>タイプの輪：${D.TYPES_RING.join(' → ')} → ヒストリー。各タイプは次の2タイプに有利、前の2タイプに不利です。</p></div>`);}
+  function openRules(){openPanel('HOW TO PLAY',`<h2>遊び方</h2><div class="panel-copy"><p><strong>1. 自分の3枚を選ぶ</strong><br>枠を選び、一覧のカードをタップ。左の1枚目からフィールドに出ます。CPUの3枚は対戦ごとにランダムです。</p><p><strong>2. じゃんけんで攻撃権を決める</strong><br>勝てばあなたが攻撃、負ければ相手が攻撃。あいこは攻撃せず、必殺ゲージが進みます。</p><p><strong>3. ゲージ6で必殺技をON</strong><br>ボタンを押してON。次にじゃんけんに勝ったとき発動します。もう一度押すとOFFにできます。技の内容は「技を見る」で確認できます。</p><p><strong>4. 相性と交代を使う</strong><br>有利な相手には×1.5、不利なら×0.67。自主交代はゲージが0になり、相手の攻撃を受けます。</p><p><strong>5. 相手の3枚を倒せば勝利</strong><br>HPが0になったら交代。残りのカードがなくなったチームの負けです。</p><p>タイプの輪：${D.TYPES_RING.join(' → ')} → ヒストリー。各タイプは次の2タイプに有利、前の2タイプに不利です。</p></div>`);}
   function showScreen(which){screen=which;for(const n of ['setup','battle','result'])$(n+'Screen').hidden=n!==which;document.body.classList.toggle('in-battle',which==='battle');$(which+'Screen').classList.remove('screen-enter');requestAnimationFrame(()=>$(which+'Screen').classList.add('screen-enter'));if(which!=='battle')audio.bgm.pause();window.scrollTo(0,0);}
   function uiState(){
     const enabled=screen==='battle'&&phase==='input'&&!$('panelDialog').open&&!state?.ended;
@@ -92,17 +80,21 @@
   }
   function renderBattle(){battleView.render(state,uiState());}
   function controls(){if(state)battleView.renderControls(state,uiState());}
-  function message(text){
+  function message(text,duration=2200){
     clearTimeout(messageTimer);$('battleMessage').textContent=text;$('battleMessage').classList.add('show');
-    messageTimer=setTimeout(()=>$('battleMessage').classList.remove('show'),options.reduced?1400:1400/options.speed);
+    messageTimer=setTimeout(()=>$('battleMessage').classList.remove('show'),duration);
     log.push(text);if(log.length>100)log.shift();
+  }
+  function affinityText(){
+    const a=E.active(state,'A'),b=E.active(state,'B'),mult=E.typeMult(a.type,b.type);
+    return mult>1?`相性有利！ あなたの攻撃 ×${mult}`:mult<1?`相性不利。あなたの攻撃 ×${mult}`:'相性は互角。あなたの攻撃 ×1';
   }
   async function playEvent(ev,token){
     if(token!==epoch)return;
     const side=ev.side,root=$(side==='A'?'allyCard':'enemyCard'),w=E.active(state,side);
     if(ev.kind==='skill'){
       if(side==='A')armed=false;
-      message(`${w.name}：${ev.title}`);await fx.cutIn(w,ev,token);if(token!==epoch)return;renderBattle();
+      message(`${w.name}の必殺技「${ev.title}」`,3000);await fx.cutIn(w,ev,token);if(token!==epoch)return;await hold(850,token);if(token!==epoch)return;renderBattle();
       const source=ev.copyFrom===null?w:D.WORDS[ev.copyFrom];
       const statusCopy={title:source.skill[0],description:source.skill[1]};
       if(ev.family==='copy')await statusEffect(side,'copy',statusCopy,token);
@@ -132,8 +124,9 @@
   async function runAttack(side,sp,token,tick=true){const iterator=E.attack(state,side,sp,{tick});let n=iterator.next(),special=false;while(!n.done){if(n.value.kind==='skill')special=true;await playEvent({...n.value,special},token);if(token!==epoch||state.ended)return {ko:true};n=iterator.next();}return n.value;}
   async function switchAnimation(side,index,token){
     const root=$(side==='A'?'allyCard':'enemyCard');await animate(root,[{opacity:1,transform:getComputedStyle(root).transform},{opacity:0,transform:`translateX(${side==='A'?-50:50}px) rotate(-12deg)`}],220);
-    if(token!==epoch)return;E.switchTo(state,side,index);if(side==='A')armed=false;renderBattle();tone('place');message(`${E.active(state,side).name}が場に登場`);
-    await animate(root,[{opacity:0,transform:`translateX(${side==='A'?-50:50}px) rotate(12deg)`},{opacity:1,transform:getComputedStyle(root).transform}],350);
+    if(token!==epoch)return;E.switchTo(state,side,index);if(side==='A')armed=false;renderBattle();tone('place');message(`${E.active(state,side).name}がフィールドに登場！ ${affinityText()}`,3000);
+    await Promise.all([animate(root,[{opacity:0,transform:`translateX(${side==='A'?-50:50}px) rotate(12deg)`},{opacity:1,transform:getComputedStyle(root).transform}],420,token),enter(side,token)]);
+    await hold(650,token);
   }
   async function pick(hand){
     if(phase!=='input'||$('panelDialog').open||!state||state.ended)return;
@@ -157,7 +150,7 @@
       const idx=state.B.team.findIndex((w,i)=>i!==state.B.index&&w.hp>0&&E.typeMult(w.type,a.type)>=1.5);
       if(idx<0||state.rng()>=.7)return;
       pauseTimers();phase='animating';controls();const token=epoch;
-      try{await switchAnimation('B',idx,token);if(token!==epoch)return;message('相手が交代。あなたの攻撃チャンス！');const out=await runAttack('A',armed,token,false);if(token!==epoch||state.ended)return;if(!out.ko)E.charge(state);state.round++;renderBattle();beginInput();}catch(e){console.error(e);if(token===epoch)beginInput();}
+       try{await switchAnimation('B',idx,token);if(token!==epoch)return;message(`相手が交代！ ${affinityText()} あなたの攻撃チャンス`,2600);await hold(1000,token);if(token!==epoch)return;const out=await runAttack('A',armed,token,false);if(token!==epoch||state.ended)return;if(!out.ko)E.charge(state);state.round++;renderBattle();beginInput();}catch(e){console.error(e);if(token===epoch)beginInput();}
     },1200);
   }
   function chooseSwitch(forced=false){
@@ -172,17 +165,13 @@
     });});return promise;
   }
   function clean(){epoch++;pauseTimers();clearTimeout(toastTimer);clearTimeout(messageTimer);$('toast').hidden=true;$('battleMessage').classList.remove('show');fx.cancel();for(const a of voices)a.pause();voices.clear();if(forcedResolve){forcedResolve(null);forcedResolve=null;}$('panelDialog').dataset.forced='false';if($('panelDialog').open)$('panelDialog').close();}
-  async function start(){clean();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;battleView.reset();showScreen('battle');renderBattle();music();message('対戦開始');await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650)));if(token===epoch)beginInput();}
+  async function start(){clean();cpu=randomTeam();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;battleView.reset();showScreen('battle');renderBattle();music();message(`対戦開始！ ${affinityText()}`,2800);await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));if(token===epoch)beginInput();}
   function finish(){phase='ended';pauseTimers();controls();audio.bgm.pause();const win=state.winner==='A';$('resultTitle').textContent=win?'YOU WIN':'YOU LOSE';$('resultCopy').textContent=win?'相手のカード3枚が戦闘不能になりました。':'自分のカード3枚が戦闘不能になりました。';$('resultCards').innerHTML=state.A.team.map(w=>`<div>${card(w)}<p class="result-hp">${w.hp>0?`HP ${w.hp} / ${w.maxhp}`:'戦闘不能'}</p></div>`).join('');imageFallbacks($('resultCards'));if(win)tone('win');showScreen('result');}
-  for(const [side,suffix] of [['A','Team'],['B','Opponent']]){
-    $('random'+suffix).onclick=()=>{if(side==='A')team=randomTeam();else cpu=randomTeam();editingSide=side;slot=0;renderSetup();tone('place');};
-    $('reorder'+suffix).onclick=()=>reorderTeam(side);
-    $('save'+suffix).onclick=()=>savedTeams(true,side);$('load'+suffix).onclick=()=>savedTeams(false,side);
-  }
+  $('randomTeam').onclick=()=>{team=randomTeam();storage.set('currentTeam',team);slot=0;renderSetup();tone('place');};
   $('searchInput').oninput=renderGrid;$('startBattle').onclick=start;$('rematchButton').onclick=start;
   $('backToSetup').onclick=()=>{clean();phase='idle';showScreen('setup');renderSetup();};$('leaveBattle').onclick=()=>{if(!confirm('対戦を終了して編成に戻りますか？'))return;clean();phase='idle';showScreen('setup');renderSetup();};
   $('rulesButton').onclick=openRules;$('settingsButton').onclick=openSettings;$('battleSettingsButton').onclick=openSettings;
-  document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=()=>pick(b.dataset.hand));$('switchButton').onclick=()=>chooseSwitch();$('skillButton').onclick=()=>{if(phase==='input'&&state.A.sp>=6){armed=!armed;tone();controls();message(armed?'必殺技を予約。次に勝つと発動！':'必殺技の予約を解除しました');}};
+  document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=()=>pick(b.dataset.hand));$('switchButton').onclick=()=>chooseSwitch();$('allySkillInfo').onclick=()=>{if(state&&phase==='input')openDetail(E.active(state,'A'));};$('skillButton').onclick=()=>{if(phase==='input'&&state.A.sp>=6){armed=!armed;tone();controls();message(armed?'必殺技 ON！ 次に勝つと発動':'必殺技 OFF',2800);}};
   function openHistory(){openPanel('DUEL HISTORY',`<h2>対戦の履歴</h2><ul class="history-list">${log.slice().reverse().map(t=>`<li>${escape(t)}</li>`).join('')}</ul>`);}
   $('closeDialog').onclick=closePanel;
   $('panelDialog').addEventListener('cancel',e=>{if($('panelDialog').dataset.forced==='true')e.preventDefault();});
