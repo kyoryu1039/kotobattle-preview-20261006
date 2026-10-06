@@ -82,6 +82,7 @@
           <div class="hp-block" id="enemyHp"></div>
           <div class="stat-panel" id="enemyStats"></div>
           <div class="status-row" id="enemyStatus" aria-label="相手の状態"></div>
+          <button class="skill-peek" id="enemySkillInfo" type="button" aria-label="相手のカードと必殺技の詳細を見る"><small>必殺技の詳細 ›</small><span>✦ <b id="enemySkillName">必殺技</b></span></button>
         </div>
         <div class="card-slot enemy" id="enemyCard"></div>
       </section>
@@ -89,13 +90,13 @@
       <section class="side side-ally" aria-label="あなた">
         <div class="card-slot ally" id="allyCard"></div>
         <div class="side-info">
-          <button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る"><span>✦ <b id="allySkillName">必殺技</b></span><small>技を見る ›</small></button>
+          <div class="hp-block" id="allyHp"></div>
           <div class="stat-panel" id="allyStats"></div>
           <div class="status-row" id="allyStatus" aria-label="あなたの状態"></div>
+          <button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る"><span>✦ <b id="allySkillName">必殺技</b></span><small>技を見る ›</small></button>
           <div class="bench-panel"><span class="bench-label">控え</span><div class="bench" id="allyBench"></div>
             <button id="switchButton" class="switch-btn" type="button" aria-label="カードを交代">${icon('ui-swap')}<span>交代</span></button></div>
         </div>
-        <div class="hp-block" id="allyHp"></div>
       </section>
       <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
       <div id="jankenReveal" class="janken-reveal" hidden></div>
@@ -115,6 +116,9 @@
 
   function imageFallbacks(root) {
     root.querySelectorAll('.art-pic img').forEach(img => {
+      const fallback = img.closest('.art-pic').nextElementSibling;
+      fallback.hidden = !!img.naturalWidth;
+      img.onload = () => { fallback.hidden = true; };
       img.onerror = () => {
         const pic = img.closest('.art-pic'), source = pic.querySelector('source');
         if (source) { source.remove(); img.src = img.getAttribute('src'); return; }
@@ -131,6 +135,10 @@
     const keys = {};
     const once = (k, v) => { if (keys[k] === v) return false; keys[k] = v; return true; };
     const sideName = side => side === 'A' ? 'ally' : 'enemy';
+    new ResizeObserver(() => {
+      const note=$('affinityNote').getBoundingClientRect(),stage=$('duelStage').getBoundingClientRect();
+      if(stage.height)root.style.setProperty('--msg-top',`${note.top+note.height/2-stage.top}px`);
+    }).observe($('duelStage'));
 
     function renderSide(state, side, {instant = false} = {}) {
       const n = sideName(side), w = E.active(state, side), key = `${state[side].index}:${w.id}`;
@@ -138,13 +146,14 @@
       if (once(n + 'card', key)) {
         slot.innerHTML = `<button class="card-hit" type="button" aria-label="${escape(w.name)}の詳細">${card(w, {size: 'lg'})}</button>`;
         slot.querySelector('button').onclick = () => onDetail(side, state[side].index);
+        if(side==='B')$('enemySkillInfo').onclick=()=>onDetail(side,state[side].index);
         imageFallbacks(slot);
         $(n + 'Stats').innerHTML = stats(w);
         const owner = side === 'A' ? '<span class="owner-tag you">あなた</span>' : '<span class="owner-tag cpu">相手 CPU</span>';
         $(n + 'Hp').innerHTML = `<div class="hp-head">${owner}<b class="hp-name">${escape(w.name)}</b></div>
           <div class="hp-line"><span class="hp-num" aria-label="HP"><b class="hp-cur"></b><span class="hp-sep">/</span><span class="hp-max">${w.maxhp}</span></span>
           <span class="hp-bar" data-side="${n}"><i class="hp-ghost"></i><i class="hp-fill"></i></span></div>`;
-        if(side==='A')$('allySkillName').textContent=w.skill[0];
+        $(n+'SkillName').textContent=w.skill[0];
         instant = true;
       }
       const hp = $(n + 'Hp'), ratio = pct(w.hp, w.maxhp);
@@ -170,9 +179,10 @@
     function renderAffinity(state) {
       const a = E.active(state, 'A'), b = E.active(state, 'B');
       const mine = E.typeMult(a.type, b.type), theirs = E.typeMult(b.type, a.type);
-      const html = mine > 1 ? `<span class="aff-label">相性有利</span><span class="aff-mult">×${mine}</span>`
+      const result = mine > 1 ? `<span class="aff-label">相性有利</span><span class="aff-mult">×${mine}</span>`
         : mine < 1 ? `<span class="aff-label">相性不利</span><span class="aff-mult">×${mine}</span>`
         : `<span class="aff-label">相性</span><span class="aff-mult">×1</span>`;
+      const html = `<span class="aff-direction">あなたの攻撃</span>${result}`;
       const el = $('affinityNote');
       if (once('aff', html)) { el.innerHTML = html; el.dataset.tone = mine > 1 ? 'good' : mine < 1 ? 'bad' : 'even'; }
       el.setAttribute('aria-label', `自分の攻撃 ×${mine}（${a.type}→${b.type}）。相手の攻撃 ×${theirs}`);
@@ -181,6 +191,9 @@
 
     // ui: {phase, armed, timeLeft, enabled, switchEnabled, skillEnabled}
     function renderControls(state, ui) {
+      root.dataset.phase = ui.phase;
+      $('allySkillInfo').disabled = !ui.enabled;
+      $('enemySkillInfo').disabled = !ui.enabled;
       root.querySelectorAll('button[data-hand]').forEach(b => { b.disabled = !ui.enabled; });
       const sw = $('switchButton');
       sw.disabled = !ui.switchEnabled;

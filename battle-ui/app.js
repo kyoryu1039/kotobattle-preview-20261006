@@ -165,7 +165,19 @@
     });});return promise;
   }
   function clean(){epoch++;pauseTimers();clearTimeout(toastTimer);clearTimeout(messageTimer);$('toast').hidden=true;$('battleMessage').classList.remove('show');fx.cancel();for(const a of voices)a.pause();voices.clear();if(forcedResolve){forcedResolve(null);forcedResolve=null;}$('panelDialog').dataset.forced='false';if($('panelDialog').open)$('panelDialog').close();}
-  async function start(){clean();cpu=randomTeam();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;battleView.reset();showScreen('battle');renderBattle();music();message(`対戦開始！ ${affinityText()}`,2800);await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));if(token===epoch)beginInput();}
+  async function start(){
+    clean();cpu=randomTeam();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;
+    battleView.reset();showScreen('battle');renderBattle();music();$('inputHint').textContent='準備中';
+    for(let i=0;i<80;i++){
+      const loaded=[...document.querySelectorAll('#allyCard .art-pic img,#enemyCard .art-pic img')].every(img=>img.complete);
+      if(loaded&&document.fonts.status==='loaded')break;
+      if(!await hold(50,token))return;
+    }
+    if(token!==epoch)return;
+    message(`対戦開始！ ${affinityText()}`,2800);
+    await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));
+    if(token===epoch)beginInput();
+  }
   function finish(){phase='ended';pauseTimers();controls();audio.bgm.pause();const win=state.winner==='A';$('resultTitle').textContent=win?'YOU WIN':'YOU LOSE';$('resultCopy').textContent=win?'相手のカード3枚が戦闘不能になりました。':'自分のカード3枚が戦闘不能になりました。';$('resultCards').innerHTML=state.A.team.map(w=>`<div>${card(w)}<p class="result-hp">${w.hp>0?`HP ${w.hp} / ${w.maxhp}`:'戦闘不能'}</p></div>`).join('');imageFallbacks($('resultCards'));if(win)tone('win');showScreen('result');}
   $('randomTeam').onclick=()=>{team=randomTeam();storage.set('currentTeam',team);slot=0;renderSetup();tone('place');};
   $('searchInput').oninput=renderGrid;$('startBattle').onclick=start;$('rematchButton').onclick=start;
