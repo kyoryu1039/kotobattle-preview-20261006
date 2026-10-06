@@ -36,7 +36,7 @@
     const [fill, cx, cy] = ART[base] || [TARGET_FILL, .5, .5];
     const scale = Math.max(.92, Math.min(1.3, TARGET_FILL / fill));
     return {
-      webp: `images/webp/${base}.webp`, png: `images/webp/${base}.webp`,
+      mobile: `images/webp/${base}_mobile.webp`, webp: `images/webp/${base}.webp`, png: `images/webp/${base}.webp`,
       style: `--art-scale:${scale.toFixed(3)};--art-x:${((.5 - cx) * 100).toFixed(1)}%;--art-y:${((.5 - cy) * 100).toFixed(1)}%`
     };
   }

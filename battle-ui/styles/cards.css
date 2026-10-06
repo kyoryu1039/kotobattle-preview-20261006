@@ -12,7 +12,7 @@
 .ico{width:1em;height:1em;fill:currentColor;flex:0 0 auto;display:inline-block;vertical-align:-.14em}
 
 /* ---- Large card ---- */
-.kcard{position:relative;container-type:inline-size;width:100%;aspect-ratio:63/95;isolation:isolate;font-family:"KB Noto",var(--font-ui);color:var(--text);user-select:none;-webkit-user-select:none}
+.kcard{position:relative;container-type:inline-size;width:100%;aspect-ratio:63/95;isolation:isolate;font-family:"KB Noto",var(--font-ui);font-weight:900;color:var(--text);user-select:none;-webkit-user-select:none}
 .kcard-frame{position:absolute;inset:0;border-radius:5.5cqw;padding:3.4cqw;background:var(--metal);
   box-shadow:0 0 0 .7cqw #05090c,inset 0 0 0 .6cqw #ffffff88,inset 0 -1.2cqw 1.2cqw #0000004d,0 4cqw 7cqw #000000a6,0 0 7cqw var(--metal-glow)}
 .kcard-frame:before{content:"";position:absolute;inset:0;border-radius:inherit;background:url(../assets/img/sparkle.png) 0 0/22cqw;mix-blend-mode:screen;opacity:.55;pointer-events:none}

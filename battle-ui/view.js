@@ -19,7 +19,7 @@
 
   function picture(w, cls = '', {lazy = false} = {}) {
     const a = P.art(w);
-    return `<picture class="art-pic ${cls}" style="${a.style}"><source type="image/webp" ${lazy?'data-srcset':'srcset'}="${a.webp}"><img ${lazy?'data-src':'src'}="${a.png}" alt="${escape(w.name)}" draggable="false" decoding="async" fetchpriority="${lazy?'low':'high'}"></picture><span class="art-fallback" hidden>${escape(w.name.slice(0, 1))}</span>`;
+    return `<picture class="art-pic ${cls}" style="${a.style}"><source type="image/webp" media="(max-width:600px)" ${lazy?'data-srcset':'srcset'}="${a.mobile}"><source type="image/webp" ${lazy?'data-srcset':'srcset'}="${a.webp}"><img ${lazy?'data-src':'src'}="${a.png}" alt="${escape(w.name)}" draggable="false" decoding="async" fetchpriority="${lazy?'low':'high'}"></picture><span class="art-fallback" hidden>${escape(w.name.slice(0, 1))}</span>`;
   }
 
   // Card face. Name and move text are DOM text so long names wrap (max 2 lines).
@@ -106,7 +106,7 @@
             <button id="switchButton" class="switch-btn" type="button" aria-label="カードを交代">${icon('ui-swap')}<span>交代</span></button></div>
     <section class="control-dock" aria-label="対戦操作">
       <div class="special-panel">
-        <div class="special-info"><b id="allySkillName">必殺技</b><button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る">技の詳細</button></div>
+        <button class="special-info skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る"><span class="skill-caption"><span id="skillStateLabel">必殺技</span><small>詳細 ›</small></span><b id="allySkillName">必殺技</b></button>
         <button id="skillButton" class="gauge-panel" type="button" aria-pressed="false" aria-describedby="skillHint gaugeLabel">
           <span class="special-icon" id="skillGlyph" aria-hidden="true">${icon('fx-copy')}</span>
           <span class="gauge-copy"><span class="gauge-title" id="skillTitle">必殺技</span><small id="skillHint" class="sr-only">ゲージをためる</small></span>
@@ -121,13 +121,13 @@
   }
 
   function matchIntro(state) {
-    return `<div class="intro-content"><p class="eyebrow">WORD DUEL</p><h2>対戦開始</h2><div class="intro-match"><div><span class="owner-tag you">あなた</span>${card(E.active(state,'A'),{size:'md'})}</div><strong>VS</strong><div><span class="owner-tag cpu">相手 CPU</span>${card(E.active(state,'B'),{size:'md'})}</div></div><p>じゃんけんで、最初の攻撃を決めよう</p><button id="introSkip" class="primary-button" type="button">対戦へ ›</button></div>`;
+    return `<div class="intro-content"><p class="eyebrow">WORD DUEL</p><h2>対戦開始</h2><div class="intro-match"><div><span class="owner-tag you">あなた</span>${card(E.active(state,'A'),{size:'md'})}</div><strong>VS</strong><div><span class="owner-tag cpu">相手 CPU</span>${card(E.active(state,'B'),{size:'md'})}</div></div><p id="introLoadStatus" role="status">対戦の画像を準備中…</p><button id="introSkip" class="primary-button" type="button" disabled>読み込み中…</button></div>`;
   }
 
   const deferredArt = new Set();
   function loadPicture(pic) {
-    const source=pic.querySelector('source[data-srcset]'),img=pic.querySelector('img[data-src]');
-    if(source){source.srcset=source.dataset.srcset;source.removeAttribute('data-srcset');}
+    const img=pic.querySelector('img[data-src]');
+    for(const source of pic.querySelectorAll('source[data-srcset]')){source.srcset=source.dataset.srcset;source.removeAttribute('data-srcset');}
     if(img){img.src=img.dataset.src;img.removeAttribute('data-src');}
     deferredArt.delete(pic);
   }
@@ -142,8 +142,8 @@
       fallback.hidden = !!img.naturalWidth;
       img.onload = () => { img.closest('.art-pic').hidden = false; fallback.hidden = true; };
       img.onerror = () => {
-        const pic = img.closest('.art-pic'), source = pic.querySelector('source');
-        if (source) { source.remove(); img.src = img.getAttribute('src'); return; }
+        const pic = img.closest('.art-pic'), sources = pic.querySelectorAll('source');
+        if (sources.length) { sources.forEach(s=>s.remove()); img.src = img.getAttribute('src'); return; }
         pic.hidden = true; pic.nextElementSibling.hidden = false;
       };
       if(img.hasAttribute('data-src')){
@@ -233,7 +233,10 @@
       skill.dataset.state = ui.armed ? 'armed' : ready ? 'ready' : 'charging';
       skill.setAttribute('aria-pressed', String(!!ui.armed));
       skill.setAttribute('aria-label', ui.armed ? `必殺技ON。次の勝利で発動。押すとOFF。ゲージ ${sp}/6` : ready ? `必殺技をONにする。ゲージ ${sp}/6` : `必殺技ゲージ ${sp}/6`);
-      $('skillTitle').textContent = ui.armed ? 'ON' : '必殺技';
+      $('skillTitle').textContent = ui.armed ? '✓ ON' : ready ? '発動準備' : 'ためる';
+      $('allySkillInfo').dataset.state = skill.dataset.state;
+      $('skillStateLabel').textContent=ui.armed?'必殺技・発動待ち':ready?'必殺技・使用可能':'必殺技';
+      $('skillButton').style.setProperty('--charge',`${sp/6*100}%`);
       $('skillHint').textContent = ui.armed ? '次の勝利で発動' : ready ? 'タップしてON' : `あと${6-sp}で使える`;
       $('gaugeLabel').innerHTML = `<b>${sp}</b><small>/6</small>`;
       const pips = Array.from({length: 6}, (_, i) => `<i class="${i < sp ? 'on' : ''}"></i>`).join('');

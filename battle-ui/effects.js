@@ -10,7 +10,7 @@
     function wait(n,token=current()) { return delay(duration(n),token); }
     function hold(n,token=current()) { return delay(n,token); }
     // Reading time is independent of animation speed and reduced-motion mode.
-    const readingTime=text=>Math.max(3200,Math.min(6000,2200+text.length*65));
+    const readingTime=text=>Math.max(1400,Math.min(2400,900+text.length*32));
     async function animate(el,frames,n=300,token=current()) {
       if(!el||!alive(token))return false;
       if(options.reduced)return true;

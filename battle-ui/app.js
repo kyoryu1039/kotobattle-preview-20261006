@@ -17,6 +17,44 @@
   audio.bgm.loop=true;audio.bgm.preload='none';
   for(const a of Object.values(audio))a.preload='none';
   let audioContext,introResolve;
+  const assetLoads=new Map(),mobileArt=()=>matchMedia('(max-width:600px)').matches;
+  const assetUrl=w=>KotoPresent.art(w)[mobileArt()?'mobile':'webp'];
+  const materials=['moon-arena-preview.webp','arena-hud-plate.webp','arena-card-podium.webp','mosaic.png','sparkle.png'].map(n=>'battle-ui/assets/img/'+n);
+  function loadAsset(url){
+    if(assetLoads.has(url))return assetLoads.get(url);
+    const preload=[...document.querySelectorAll('link[rel="preload"][as="image"]')].find(l=>l.getAttribute('href')===url&&(!l.media||matchMedia(l.media).matches));
+    const promise=new Promise((resolve,reject)=>{
+      if(preload){
+        if(preload.dataset.loaded==='true'){resolve();return;}
+        if(preload.dataset.failed==='true'){reject(Error('Preload failed'));return;}
+        const t=setTimeout(()=>reject(Error('Preload timeout')),12000);
+        preload.addEventListener('load',()=>{clearTimeout(t);resolve();},{once:true});preload.addEventListener('error',()=>{clearTimeout(t);reject(Error('Preload failed'));},{once:true});return;
+      }
+      const img=new Image(),timer=setTimeout(()=>reject(Error('Image load timeout')),12000);
+      img.fetchPriority='high';img.onload=()=>{clearTimeout(timer);img.decode().catch(()=>{}).then(resolve);};img.onerror=()=>{clearTimeout(timer);reject(Error('Image load failed'));};img.src=url;
+    }).catch(e=>{assetLoads.delete(url);throw e;});
+    assetLoads.set(url,promise);return promise;
+  }
+  async function prepareAssets(urls,progress){
+    const unique=[...new Set(urls)];let done=0;
+    progress?.(0,unique.length);
+    await Promise.all(unique.map(async url=>{await loadAsset(url);progress?.(++done,unique.length);}));
+  }
+  async function bootSetup(){
+    const cover=$('bootLoading'),status=$('bootStatus'),retry=$('bootRetry');
+    retry.hidden=true;
+    try{
+      await Promise.all([...document.querySelectorAll('link[data-game-style]')].map(link=>link.dataset.loaded==='true'?Promise.resolve():new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Style load timeout')),12000);link.addEventListener('load',()=>{clearTimeout(t);resolve();},{once:true});link.addEventListener('error',()=>{clearTimeout(t);reject(Error('Style load failed'));},{once:true});})));
+      if(!$('wordGrid').childElementCount){filters();renderSetup();}
+      await new Promise(r=>requestAnimationFrame(r));
+      const visible=[...document.querySelectorAll('#setupScreen .art-pic')].filter(p=>p.getBoundingClientRect().top<innerHeight+50);
+      const art=visible.map(p=>mobileArt()?p.querySelector('source[media]').getAttribute('srcset')||p.querySelector('source[media]').dataset.srcset:p.querySelector('source:not([media])').getAttribute('srcset')||p.querySelector('source:not([media])').dataset.srcset);
+      await prepareAssets([...materials,...art],(n,total)=>{status.textContent=`カードを準備中 ${Math.round(n/total*100)}%`;});
+      await Promise.all(visible.map(p=>p.querySelector('img').decode().catch(()=>{})));
+      cover.hidden=true;
+    }
+    catch{status.textContent='読み込みが進まないため、もう一度お試しください';retry.hidden=false;retry.onclick=()=>location.reload();}
+  }
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function randomTeam(){const a=D.WORDS.map(w=>w.id),r=[];for(let i=0;i<3;i++)r.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);return r;}
   function tone(kind='select'){
@@ -169,16 +207,24 @@
   async function start(){
     clean();cpu=randomTeam();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;
     battleView.reset();showScreen('battle');renderBattle();$('inputHint').textContent='準備中';
-    const intro=$('matchIntro');intro.innerHTML=V.matchIntro(state);V.imageFallbacks(intro);intro.hidden=false;
+    const intro=$('matchIntro');delete intro.dataset.ready;intro.innerHTML=V.matchIntro(state);V.imageFallbacks(intro);intro.hidden=false;
     const skipped=new Promise(resolve=>{introResolve=resolve;});
     $('introSkip').onclick=()=>introResolve?.(true);
-    await Promise.race([hold(1500,token),skipped]);
+    const assets=[...state.A.team,...state.B.team].map(assetUrl).concat(materials,`battle-ui/assets/img/${mobileArt()?'moon-arena-mobile.webp':'moon-arena.webp'}`);
+    let prepared=false;
+    while(token===epoch&&!prepared){
+      try{await prepareAssets(assets,(n,total)=>{if(token===epoch)$('introLoadStatus').textContent=`対戦の画像を準備中 ${Math.round(n/total*100)}%`;});prepared=true;}
+      catch{if(token!==epoch)return;$('introLoadStatus').textContent='画像を読み込めませんでした';$('introSkip').disabled=false;$('introSkip').textContent='もう一度読み込む';await skipped;if(token!==epoch)return;introResolve=null;$('introSkip').disabled=true;await start();return;}
+    }
+    if(token!==epoch)return;
+    intro.dataset.ready='true';$('introLoadStatus').textContent='準備完了。じゃんけんで攻撃を決めよう';$('introSkip').disabled=false;$('introSkip').textContent='対戦へ ›';
+    await skipped;
     if(token!==epoch)return;
     introResolve=null;
     intro.hidden=true;
     const fronts=[...document.querySelectorAll('#allyCard .art-pic img,#enemyCard .art-pic img')];
     Promise.all(fronts.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true});}))).then(()=>{if(token===epoch&&screen==='battle')music();});
-    message(`対戦開始！ ${affinityText()}`,2800);
+    message(`対戦開始！ ${affinityText()}`,1400);
     await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));
     if(token===epoch)beginInput();
   }
@@ -207,5 +253,5 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseTimers();audio.bgm.pause();}else if(screen==='battle'){music();resumeTimers();}});
   document.addEventListener('keydown',e=>{if($('panelDialog').open||screen!=='battle'||phase!=='input')return;if(['1','2','3'].includes(e.key)){e.preventDefault();pick(['G','C','P'][+e.key-1]);}});
   applySettings();
-  filters();renderSetup();
+  requestAnimationFrame(bootSetup);
 })();
