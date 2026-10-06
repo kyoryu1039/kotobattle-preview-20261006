@@ -359,3 +359,37 @@ body.in-result{background:#091522}
 .match-intro .primary-button:disabled{opacity:.5;cursor:wait}
 @media(max-width:350px){.battle-screen.mock-layout .special-panel{grid-template-columns:minmax(0,1fr) 118px;gap:4px}.battle-screen.mock-layout .special-panel>#allySkillInfo{padding:4px 6px}.special-info>#allySkillName{font-size:12px}}
 @media(max-height:600px){.battle-screen.mock-layout .special-panel{padding:0;min-height:50px}.battle-screen.mock-layout .duel{min-height:104px}}
+/* Reserve the full label plates; card text must never shrink into the artwork. */
+.kcard-name b,.kcard-move b{line-height:1.35}
+.setup-screen .word-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 18px}
+.setup-screen .word-pick .kcard-name b{font-size:10cqw}
+.setup-screen .word-pick .kcard-move b{font-size:8.4cqw}
+.setup-screen .word-more{bottom:auto;top:21%;right:7px}
+.battle-screen.mock-layout .card-slot .kcard-name b{font-size:10cqw}
+.battle-screen.mock-layout .card-slot .kcard-move b{font-size:8.4cqw}
+@media(max-width:699px){
+ .battle-screen.mock-layout .card-slot.ally{left:4%;width:min(47cqw,59cqh)}
+ .battle-screen.mock-layout .card-slot.enemy{right:4%;width:min(37cqw,49cqh)}
+ .battle-screen.mock-layout .vs-row{top:min(calc(10% + min(55.8cqw,73.9cqh) + 10px),calc(100% - 32px));right:4%}
+ .ring-ally{left:1%;width:53%}.ring-enemy{right:1%;width:44%;top:calc(10% + min(55.8cqw,73.9cqh) - 8px)}
+}
+@media(min-width:700px){.setup-screen .word-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-height:640px) and (max-width:699px){
+ .battle-screen.mock-layout .battle-hud .side-info{position:relative}
+ .battle-screen.mock-layout .battle-hud .hp-head{padding-right:132px}
+ .battle-screen.mock-layout .battle-hud .hp-name{font-size:11px}
+ .battle-screen.mock-layout .battle-hud .stat-panel{display:flex;position:absolute;right:0;top:1px;gap:5px;min-height:18px;margin:0}
+ .battle-screen.mock-layout .battle-hud .stat-label{font-size:10px}
+ .battle-screen.mock-layout .battle-hud .stat-value{font-size:12px}
+ .battle-screen.mock-layout .battle-hud .stat-value small{font-size:9px}
+ .battle-screen.mock-layout .battle-head{height:38px;min-height:38px}
+ .battle-screen.mock-layout .hands{height:60px}
+ .battle-screen.mock-layout .dock-row{height:19px;min-height:19px}
+ .battle-screen.mock-layout>.bench-panel{min-height:44px;padding:2px 10px 4px}
+ .battle-screen.mock-layout .card-slot.ally,.battle-screen.mock-layout .card-slot.enemy{width:min(43cqw,60cqh);top:2%;bottom:auto}
+ .battle-screen.mock-layout .card-slot .kcard{aspect-ratio:63/82}
+ .battle-screen.mock-layout .card-slot.ally .card-hit{transform:rotate(-2deg)}
+ .battle-screen.mock-layout .card-slot.enemy .card-hit{transform:rotate(2deg)}
+ .battle-screen.mock-layout .vs-row{right:4%;top:auto;bottom:0}
+ .ring-ally,.ring-enemy{top:auto;bottom:1%;height:8%}
+}
