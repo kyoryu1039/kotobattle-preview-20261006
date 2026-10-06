@@ -1,26 +1,26 @@
 <!doctype html>
 <html lang="ja">
 <head>
+<meta name="robots" content="noindex,nofollow">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#0b171b">
   <link rel="icon" href="data:,">
   <link rel="preload" as="image" href="battle-ui/assets/img/moon-arena-preview.webp" fetchpriority="high">
   <link rel="preload" as="image" href="battle-ui/assets/img/moon-arena-mobile.webp" media="(max-width:600px)" fetchpriority="low">
   <link rel="preload" as="image" href="battle-ui/assets/img/moon-arena.webp" media="(min-width:601px)" fetchpriority="low">
   <title>ことばバトル — WORD DUEL</title>
-  <link rel="stylesheet" href="battle-ui/styles/tokens.css?v=20261007-textfit">
-  <link rel="stylesheet" href="battle-ui/ui.css?v=20261007-textfit">
-  <link rel="stylesheet" href="battle-ui/styles/cards.css?v=20261007-textfit">
-  <link rel="stylesheet" href="battle-ui/styles/battle.css?v=20261007-textfit">
-  <link rel="stylesheet" href="battle-ui/styles/mockup.css?v=20261007-textfit">
-  <script defer src="battle-ui/data.js?v=20261007-textfit"></script>
-  <script defer src="battle-ui/engine.js?v=20261007-textfit"></script>
-  <script defer src="battle-ui/presentation.js?v=20261007-textfit"></script>
-  <script defer src="battle-ui/view.js?v=20261007-textfit"></script>
-  <script defer src="battle-ui/effects.js?v=20261007-textfit"></script>
-  <script defer src="battle-ui/app.js?v=20261007-textfit"></script>
+  <link rel="stylesheet" href="battle-ui/styles/tokens.css?v=20261007-battle-flow">
+  <link rel="stylesheet" href="battle-ui/ui.css?v=20261007-battle-flow">
+  <link rel="stylesheet" href="battle-ui/styles/cards.css?v=20261007-battle-flow">
+  <link rel="stylesheet" href="battle-ui/styles/battle.css?v=20261007-battle-flow">
+  <link rel="stylesheet" href="battle-ui/styles/mockup.css?v=20261007-battle-flow">
+  <script defer src="battle-ui/data.js?v=20261007-battle-flow"></script>
+  <script defer src="battle-ui/engine.js?v=20261007-battle-flow"></script>
+  <script defer src="battle-ui/presentation.js?v=20261007-battle-flow"></script>
+  <script defer src="battle-ui/view.js?v=20261007-battle-flow"></script>
+  <script defer src="battle-ui/effects.js?v=20261007-battle-flow"></script>
+  <script defer src="battle-ui/app.js?v=20261007-battle-flow"></script>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"></div>
@@ -36,7 +36,7 @@
       <div class="setup-dock"><p class="match-summary"><span>あなたの3枚</span><b>VS</b><span>ランダムCPU</span></p><button id="startBattle" class="primary-button">この3枚で対戦 <span>↗</span></button></div>
     </section>
     <section id="battleScreen" class="battle-screen" hidden></section>
-    <section id="resultScreen" class="result-screen" hidden><p class="eyebrow">対戦結果</p><h1 id="resultTitle">YOU WIN</h1><p id="resultCopy"></p><div id="resultCards" class="result-cards"></div><div class="result-actions"><button id="rematchButton" class="primary-button">同じチームで再戦 ↗</button><button id="backToSetup" class="subtle-button">編成を変える</button><a href="index.html" class="text-button">アーケードへ</a></div></section>
+    <section id="resultScreen" class="result-screen" hidden aria-labelledby="resultTitle"><div class="result-hero"><p class="eyebrow">BATTLE RESULT</p><div id="resultEmblem" class="result-emblem" aria-hidden="true"></div><h1 id="resultTitle">YOU WIN</h1><b id="resultOutcome" class="result-outcome">勝利</b></div><div id="resultStats" class="result-stats"></div><div id="resultCards" class="result-cards"></div><p id="resultCopy"></p><div class="result-actions"><button id="rematchButton" class="primary-button">もう一度対戦 ›</button><button id="backToSetup" class="subtle-button">編成を変える</button></div></section>
   </main>
   <dialog id="panelDialog" class="panel-dialog"><div class="dialog-head"><p class="eyebrow" id="dialogLabel"></p><button id="closeDialog" class="icon-button" aria-label="閉じる">×</button></div><div id="dialogContent"></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>

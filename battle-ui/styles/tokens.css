@@ -7,7 +7,7 @@
 
 :root{
   --font-title:"KB Dela","Dela Gothic One","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
-  --font-ui:"KB Noto","Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  --font-ui:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
   --font-num:"KB Barlow","Barlow Condensed","Arial Narrow","KB Noto",sans-serif;
 
   --ink:#081014;--arena:#0b171b;--text:#f3f7f8;--muted:#9fb3b8;--line:#7fb6c233;

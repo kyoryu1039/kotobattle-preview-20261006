@@ -9,6 +9,8 @@
     function delay(n,token) { if(!alive(token))return Promise.resolve(false);return new Promise(resolve=>{const id=setTimeout(()=>{delays.delete(id);resolve(alive(token));},n);delays.set(id,resolve);}); }
     function wait(n,token=current()) { return delay(duration(n),token); }
     function hold(n,token=current()) { return delay(n,token); }
+    // Reading time is independent of animation speed and reduced-motion mode.
+    const readingTime=text=>Math.max(3200,Math.min(6000,2200+text.length*65));
     async function animate(el,frames,n=300,token=current()) {
       if(!el||!alive(token))return false;
       if(options.reduced)return true;
@@ -75,11 +77,12 @@
       node.innerHTML=`<i class="status-halo" aria-hidden="true"></i><div class="status-core">${V.icon(P.FAMILY[family]?.icon||'fx-debuff')}<strong>${V.escape(P.FAMILY[family]?.label||'状態変化')}</strong><b>${V.escape(statusHeadline(family,description))}</b><small>${V.escape(description)}</small></div>`;
       target.dataset.statusFlash=family;layer.append(node);
       try{
-        if(options.reduced)await hold(1050,token);
-        else await Promise.all([
-          animate(node,[{opacity:0,transform:'translateY(12px) scale(.75)'},{opacity:1,transform:'translateY(0) scale(1)',offset:.2},{opacity:1,transform:'translateY(0) scale(1)',offset:.78},{opacity:0,transform:'translateY(-12px) scale(1.1)'}],options.speed===2?2100:1400,token),
+        await Promise.all([
+          animate(node,[{opacity:0,transform:'translateY(12px) scale(.9)'},{opacity:1,transform:'translateY(0) scale(1)'}],180,token),
           animate(target,[{filter:'brightness(1)'},{filter:'brightness(1.6) saturate(1.3)',offset:.4},{filter:'brightness(1)'}],520,token)
         ]);
+        if(!await hold(readingTime(description),token))return;
+        await animate(node,[{opacity:1},{opacity:0}],160,token);
       }finally{node.remove();if(alive(token))delete target.dataset.statusFlash;}
     }
     async function cutIn(w,event,token) {
@@ -90,7 +93,7 @@
       const explanation=event.copyFrom===null?source.skill[1]:`${source.skill[1]} コピーで威力2倍。`;
       el.innerHTML=`<span class="cutin-streaks" aria-hidden="true"></span>`+V.card(w,{size:'md'})+`<div class="cutin-text"><div class="cutin-kind">${V.icon(P.FAMILY[event.family].icon)}必殺技 <span>${V.escape(P.FAMILY[event.effectFamily].label)}</span></div><h2 class="cutin-title">${V.escape(event.title)}</h2><div class="cutin-owner">${V.escape(w.name)}${event.copyFrom!==null?` → ${V.escape(source.name)}の技`:''}</div><p class="cutin-description">${V.escape(explanation)}</p></div>`;
       V.imageFallbacks(el);el.hidden=false;sound('skill');await Promise.all([animate(el,[{opacity:0,transform:'translate(-80px,-50%) skewX(-6deg)'},{opacity:1,transform:'translate(0,-50%) skewX(0deg)'}],180,token),animate(el.querySelector('.kcard'),[{transform:'rotate(-16deg) scale(.7)'},{transform:'rotate(-6deg) scale(1.08)',offset:.8},{transform:'rotate(-6deg) scale(1)'}],300,token)]);
-      if(!await hold(options.speed===2?1600:2200,token)){dim.remove();return;}await animate(el,[{opacity:1,transform:'translate(0,-50%)'},{opacity:0,transform:'translate(50px,-50%)'}],130,token);if(alive(token))el.hidden=true;dim.remove();
+      if(!await hold(readingTime(explanation),token)){dim.remove();return;}await animate(el,[{opacity:1,transform:'translate(0,-50%)'},{opacity:0,transform:'translate(50px,-50%)'}],130,token);if(alive(token))el.hidden=true;dim.remove();
     }
     async function attack(ev,token,onImpact) {
       const attacker=view.cardEl(ev.attacker),defender=view.cardEl(ev.side),a=position(ev.attacker),d=position(ev.side);

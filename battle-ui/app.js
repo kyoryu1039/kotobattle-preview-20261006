@@ -16,7 +16,7 @@
   const audio={bgm:new Audio('audio/Hypnagogiaondo.mp3'),hit:new Audio('audio/hit.mp3'),skill:new Audio('audio/skill.mp3'),ko:new Audio('audio/ko.mp3')};
   audio.bgm.loop=true;audio.bgm.preload='none';
   for(const a of Object.values(audio))a.preload='none';
-  let audioContext;
+  let audioContext,introResolve;
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function randomTeam(){const a=D.WORDS.map(w=>w.id),r=[];for(let i=0;i<3;i++)r.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);return r;}
   function tone(kind='select'){
@@ -26,7 +26,7 @@
   function sound(kind){const a=audio[kind];if(!a||!options.se)return;const copy=a.cloneNode();copy.volume=options.se;voices.add(copy);copy.play().catch(()=>voices.delete(copy));copy.onended=()=>voices.delete(copy);}
   function music(){audio.bgm.volume=options.bgm;if(options.bgm)audio.bgm.play().catch(()=>{});else audio.bgm.pause();}
   function toast(text){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2300);}
-  function card(w){return V.card(w,{size:'md'});}
+  function card(w,lazy=false){return V.card(w,{size:'md',lazy});}
   function imageFallbacks(root){V.imageFallbacks(root);}
   function selectSlot(index){slot=index;tone();renderSetup();}
   function setWord(id){
@@ -43,7 +43,7 @@
   }
   function renderGrid(){
     const q=$('searchInput').value.trim(),kana=q.replace(/[ぁ-ん]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));const list=D.WORDS.filter(w=>(filter==='all'||w.type===filter)&&(!q||w.name.includes(q)||w.yomi.includes(kana)||w.skill[0].includes(q)));
-    $('wordGrid').innerHTML=list.map(w=>{const chosen=team.indexOf(w.id);return `<div class="word-entry ${chosen>=0?'in-team':''}" data-word="${w.id}"><button class="word-pick" data-pick="${w.id}" type="button" aria-label="${escape(w.name)}を${slot+1}枚目にセット">${card(w)}${chosen>=0?`<span class="chosen-badge" aria-label="${chosen+1}枚目に編成中">✓</span>`:''}</button><button class="word-more" data-detail="${w.id}" type="button" aria-label="${escape(w.name)}の詳細を見る">ⓘ</button></div>`;}).join('');
+    $('wordGrid').innerHTML=list.map(w=>{const chosen=team.indexOf(w.id);return `<div class="word-entry ${chosen>=0?'in-team':''}" data-word="${w.id}"><button class="word-pick" data-pick="${w.id}" type="button" aria-label="${escape(w.name)}を${slot+1}枚目にセット">${card(w,true)}${chosen>=0?`<span class="chosen-badge" aria-label="${chosen+1}枚目に編成中">✓</span>`:''}</button><button class="word-more" data-detail="${w.id}" type="button" aria-label="${escape(w.name)}の詳細を見る">ⓘ</button></div>`;}).join('');
     $('emptySearch').hidden=list.length>0;imageFallbacks($('wordGrid'));
     $('wordGrid').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>setWord(+b.dataset.pick));
     $('wordGrid').querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetail(D.WORDS[+b.dataset.detail],true));
@@ -72,7 +72,7 @@
     if($('historyButton'))$('historyButton').onclick=openHistory;
   }
   function openRules(){openPanel('HOW TO PLAY',`<h2>遊び方</h2><div class="panel-copy"><p><strong>1. 自分の3枚を選ぶ</strong><br>枠を選び、一覧のカードをタップ。左の1枚目からフィールドに出ます。CPUの3枚は対戦ごとにランダムです。</p><p><strong>2. じゃんけんで攻撃権を決める</strong><br>勝てばあなたが攻撃、負ければ相手が攻撃。あいこは攻撃せず、必殺ゲージが進みます。</p><p><strong>3. ゲージ6で必殺技をON</strong><br>ボタンを押してON。次にじゃんけんに勝ったとき発動します。もう一度押すとOFFにできます。技の内容は「技を見る」で確認できます。</p><p><strong>4. 相性と交代を使う</strong><br>有利な相手には×1.5、不利なら×0.67。自主交代はゲージが0になり、相手の攻撃を受けます。</p><p><strong>5. 相手の3枚を倒せば勝利</strong><br>HPが0になったら交代。残りのカードがなくなったチームの負けです。</p><p>タイプの輪：${D.TYPES_RING.join(' → ')} → ヒストリー。各タイプは次の2タイプに有利、前の2タイプに不利です。</p></div>`);}
-  function showScreen(which){screen=which;for(const n of ['setup','battle','result'])$(n+'Screen').hidden=n!==which;document.body.classList.toggle('in-battle',which==='battle');$(which+'Screen').classList.remove('screen-enter');requestAnimationFrame(()=>$(which+'Screen').classList.add('screen-enter'));if(which!=='battle')audio.bgm.pause();window.scrollTo(0,0);}
+  function showScreen(which){screen=which;for(const n of ['setup','battle','result'])$(n+'Screen').hidden=n!==which;document.body.classList.toggle('in-battle',which==='battle');document.body.classList.toggle('in-result',which==='result');$(which+'Screen').classList.remove('screen-enter');requestAnimationFrame(()=>$(which+'Screen').classList.add('screen-enter'));if(which!=='battle')audio.bgm.pause();window.scrollTo(0,0);}
   function uiState(){
     const enabled=screen==='battle'&&phase==='input'&&!$('panelDialog').open&&!state?.ended;
     const a=state&&E.active(state,'A');
@@ -94,9 +94,10 @@
     const side=ev.side,root=$(side==='A'?'allyCard':'enemyCard'),w=E.active(state,side);
     if(ev.kind==='skill'){
       if(side==='A')armed=false;
-      message(`${w.name}の必殺技「${ev.title}」`,3000);await fx.cutIn(w,ev,token);if(token!==epoch)return;await hold(850,token);if(token!==epoch)return;renderBattle();
+      message(`${w.name}の必殺技「${ev.title}」`,4500);await fx.cutIn(w,ev,token);if(token!==epoch)return;renderBattle();
       const source=ev.copyFrom===null?w:D.WORDS[ev.copyFrom];
       const statusCopy={title:source.skill[0],description:source.skill[1]};
+      log.push(`必殺技の効果：${ev.title} — ${statusCopy.description}${ev.copyFrom!==null?' コピーで威力2倍。':''}`);
       if(ev.family==='copy')await statusEffect(side,'copy',statusCopy,token);
       const family=ev.effectFamily;
       if(['buff','guard','debuff'].includes(family))await statusEffect(family==='debuff'?E.other(side):side,family,statusCopy,token);
@@ -164,25 +165,38 @@
       const token=epoch;try{await switchAnimation('A',idx,token);if(token!==epoch)return;const out=await runAttack('B',true,token,false);if(token!==epoch||state.ended)return;if(!out.ko)E.charge(state);state.round++;renderBattle();beginInput();}catch(e){console.error(e);if(token===epoch)beginInput();}resolve(idx);
     });});return promise;
   }
-  function clean(){epoch++;pauseTimers();clearTimeout(toastTimer);clearTimeout(messageTimer);$('toast').hidden=true;$('battleMessage').classList.remove('show');fx.cancel();for(const a of voices)a.pause();voices.clear();if(forcedResolve){forcedResolve(null);forcedResolve=null;}$('panelDialog').dataset.forced='false';if($('panelDialog').open)$('panelDialog').close();}
+  function clean(){epoch++;if(introResolve){introResolve(false);introResolve=null;}$('matchIntro').hidden=true;pauseTimers();clearTimeout(toastTimer);clearTimeout(messageTimer);$('toast').hidden=true;$('battleMessage').classList.remove('show');fx.cancel();for(const a of voices)a.pause();voices.clear();if(forcedResolve){forcedResolve(null);forcedResolve=null;}$('panelDialog').dataset.forced='false';if($('panelDialog').open)$('panelDialog').close();}
   async function start(){
     clean();cpu=randomTeam();state=E.create(team,cpu);log=[];armed=false;phase='animating';const token=epoch;
-    battleView.reset();showScreen('battle');renderBattle();music();$('inputHint').textContent='準備中';
-    for(let i=0;i<80;i++){
-      const loaded=[...document.querySelectorAll('#allyCard .art-pic img,#enemyCard .art-pic img')].every(img=>img.complete);
-      if(loaded&&document.fonts.status==='loaded')break;
-      if(!await hold(50,token))return;
-    }
+    battleView.reset();showScreen('battle');renderBattle();$('inputHint').textContent='準備中';
+    const intro=$('matchIntro');intro.innerHTML=V.matchIntro(state);V.imageFallbacks(intro);intro.hidden=false;
+    const skipped=new Promise(resolve=>{introResolve=resolve;});
+    $('introSkip').onclick=()=>introResolve?.(true);
+    await Promise.race([hold(1500,token),skipped]);
     if(token!==epoch)return;
+    introResolve=null;
+    intro.hidden=true;
+    const fronts=[...document.querySelectorAll('#allyCard .art-pic img,#enemyCard .art-pic img')];
+    Promise.all(fronts.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true});}))).then(()=>{if(token===epoch&&screen==='battle')music();});
     message(`対戦開始！ ${affinityText()}`,2800);
     await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));
     if(token===epoch)beginInput();
   }
-  function finish(){phase='ended';pauseTimers();controls();audio.bgm.pause();const win=state.winner==='A';$('resultTitle').textContent=win?'YOU WIN':'YOU LOSE';$('resultCopy').textContent=win?'相手のカード3枚が戦闘不能になりました。':'自分のカード3枚が戦闘不能になりました。';$('resultCards').innerHTML=state.A.team.map(w=>`<div>${card(w)}<p class="result-hp">${w.hp>0?`HP ${w.hp} / ${w.maxhp}`:'戦闘不能'}</p></div>`).join('');imageFallbacks($('resultCards'));if(win)tone('win');showScreen('result');}
+  function finish(){
+    phase='ended';pauseTimers();controls();audio.bgm.pause();const win=state.winner==='A';
+    $('resultScreen').dataset.outcome=win?'win':'lose';$('resultTitle').textContent=win?'YOU WIN':'YOU LOSE';
+    $('resultOutcome').textContent=win?'勝利':'敗北';$('resultCopy').textContent=win?'3枚でつかんだ勝利。次の対戦へ。':'相性と交代を見直して、もう一度挑戦しよう。';
+    $('resultEmblem').innerHTML=V.icon(win?'fx-guard':'stat-atk');
+    $('resultStats').innerHTML=`<div><small>ラウンド</small><b>${state.round}</b></div><div><small>撃破</small><b>${state.B.team.filter(w=>w.hp<=0).length}<span>/3</span></b></div><div><small>生存</small><b>${state.A.team.filter(w=>w.hp>0).length}<span>/3</span></b></div>`;
+    $('resultCards').innerHTML=state.A.team.map((w,i)=>`<div class="result-card" data-alive="${w.hp>0}" data-featured="${win&&i===state.A.index}">${card(w)}<p class="result-hp">${w.hp>0?`HP ${w.hp} / ${w.maxhp}`:'戦闘不能'}</p></div>`).join('');
+    $('rematchButton').textContent=win?'もう一度対戦 ›':'もう一度挑戦 ›';$('backToSetup').textContent=win?'編成を変える':'編成を見直す';
+    imageFallbacks($('resultCards'));if(win)tone('win');showScreen('result');
+  }
   $('randomTeam').onclick=()=>{team=randomTeam();storage.set('currentTeam',team);slot=0;renderSetup();tone('place');};
   $('searchInput').oninput=renderGrid;$('startBattle').onclick=start;$('rematchButton').onclick=start;
   $('backToSetup').onclick=()=>{clean();phase='idle';showScreen('setup');renderSetup();};$('leaveBattle').onclick=()=>{if(!confirm('対戦を終了して編成に戻りますか？'))return;clean();phase='idle';showScreen('setup');renderSetup();};
   $('rulesButton').onclick=openRules;$('settingsButton').onclick=openSettings;$('battleSettingsButton').onclick=openSettings;
+  $('battleHistoryButton').onclick=openHistory;
   document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=()=>pick(b.dataset.hand));$('switchButton').onclick=()=>chooseSwitch();$('allySkillInfo').onclick=()=>{if(state&&phase==='input')openDetail(E.active(state,'A'));};$('skillButton').onclick=()=>{if(phase==='input'&&state.A.sp>=6){armed=!armed;tone();controls();message(armed?'必殺技 ON！ 次に勝つと発動':'必殺技 OFF',2800);}};
   function openHistory(){openPanel('DUEL HISTORY',`<h2>対戦の履歴</h2><ul class="history-list">${log.slice().reverse().map(t=>`<li>${escape(t)}</li>`).join('')}</ul>`);}
   $('closeDialog').onclick=closePanel;

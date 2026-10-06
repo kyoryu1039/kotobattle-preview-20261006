@@ -273,3 +273,69 @@ body .battle-screen.mock-layout{min-height:0;overflow-x:hidden;overflow-y:auto;s
 }
 @media(max-height:740px){.battle-screen.mock-layout>.bench-panel{padding:3px 12px 5px}.battle-screen.mock-layout .bench{padding:1px 4px 5px}}
 @media(max-height:600px){body .battle-screen.mock-layout{gap:2px}.battle-screen.mock-layout .mini{--mini-w:34px}.battle-screen.mock-layout>.bench-panel{min-height:48px}}
+
+/* Battle flow: a brief face-off, tactile actions and a distinct result. */
+.art-pic img[data-src]{visibility:hidden}
+.battle-screen.mock-layout .special-panel{display:grid;grid-template-columns:minmax(0,1fr) 140px;gap:8px;align-items:center;padding:4px 0;border:0;background:none;box-shadow:none}
+.special-info{display:flex;align-items:center;gap:7px;min-width:0}
+.special-info>#allySkillName{flex:1;min-width:0;font-size:12px;line-height:1.5;color:#e7cdf5;overflow-wrap:anywhere}
+.battle-screen.mock-layout .special-info>.skill-peek{flex:0 0 66px;width:66px;min-width:66px;max-width:66px;min-height:44px;padding:5px 8px;font-size:11px;font-weight:900;color:#f8edce;border:1px solid #d2b986;border-radius:5px;background:linear-gradient(#39536a,#182b41);box-shadow:inset 0 1px #fff6,0 3px 0 #050c15,0 4px 7px #0009}
+.battle-screen.mock-layout .gauge-panel{width:100%;min-height:48px;padding:6px 10px;justify-content:space-between;gap:6px;border:1px solid #6c91b1;border-radius:6px;background:linear-gradient(#2b4764,#172a42);box-shadow:inset 0 1px #fff5,0 4px 0 #030a12,0 5px 9px #0009;color:#d9e8f2}
+.battle-screen.mock-layout .gauge-panel:disabled{opacity:.7}
+.battle-screen.mock-layout .gauge-panel .special-icon{display:none}
+.battle-screen.mock-layout .gauge-panel .gauge-copy{flex:0 1 auto}
+.battle-screen.mock-layout .gauge-panel .gauge-title{font-size:15px;line-height:1.4;color:inherit}
+.battle-screen.mock-layout .gauge-panel[data-state="ready"],.battle-screen.mock-layout .gauge-panel[data-state="armed"]{color:#2c1c08;border-color:#ffe8a6;background:var(--metal-gold);box-shadow:inset 0 1px #fff9,0 4px 0 #644114,0 0 14px #ffd04a55}
+.battle-screen.mock-layout .gauge-panel[data-state="ready"]:disabled{opacity:.7}
+.battle-screen.mock-layout .gauge-panel[data-state="armed"]{border-color:#fff5cf;box-shadow:inset 0 0 0 2px #fff3bd,0 3px 0 #644114,0 0 16px #ffd04a88}
+.battle-screen.mock-layout .gauge-panel[data-state="ready"] .gauge-pips i.on,.battle-screen.mock-layout .gauge-panel[data-state="armed"] .gauge-pips i.on{background:#624310;border-color:#b98635;box-shadow:none}
+.battle-screen.mock-layout .gauge-panel[data-state="ready"] .gauge-count b,.battle-screen.mock-layout .gauge-panel[data-state="ready"] .gauge-count small,.battle-screen.mock-layout .gauge-panel[data-state="armed"] .gauge-count b,.battle-screen.mock-layout .gauge-panel[data-state="armed"] .gauge-count small{color:#2c1c08}
+.battle-screen.mock-layout .switch-btn{border:1px solid #d2b986;border-radius:5px;background:linear-gradient(#49647a,#21364c);box-shadow:inset 0 1px #fff6,0 3px 0 #050b14,0 5px 8px #0009}
+.battle-screen.mock-layout .switch-btn:disabled,.battle-screen.mock-layout .skill-peek:disabled{opacity:.5;box-shadow:none}
+.battle-screen.mock-layout .switch-btn:not(:disabled):active,.battle-screen.mock-layout .skill-peek:not(:disabled):active,.battle-screen.mock-layout .gauge-panel:not(:disabled):active{transform:translateY(3px);box-shadow:inset 0 1px #fff4}
+.battle-screen.mock-layout .round-badge{font-family:var(--font-num);cursor:pointer;box-shadow:inset 0 1px #fff4,0 2px #02070b}
+.battle-screen.mock-layout .round-badge small{font-family:var(--font-ui)}
+.match-intro{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:22px 16px;background:linear-gradient(#061329b8,#061329b8),url(../assets/img/moon-arena-preview.webp) center/cover;overflow:auto}
+.intro-content{width:min(100%,460px);text-align:center}
+.intro-content>.eyebrow{color:#e0bf71;letter-spacing:.3em}
+.intro-content>h2{margin:7px 0 20px;font:400 clamp(25px,7vw,42px)/1.4 var(--font-title);color:#fff;text-shadow:0 3px #081421,0 0 22px #70bbf766}
+.intro-match{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);align-items:center;gap:10px;margin:0 auto 20px;max-width:350px}
+.intro-match>div{display:grid;gap:14px;justify-items:center;min-width:0}
+.intro-match .kcard{width:min(100%,130px)}
+.intro-match>strong{font:800 38px/1 var(--font-num);color:#ffdc7c;text-shadow:0 3px #6d4318,0 0 18px #ffda6c55}
+.intro-content>p:not(.eyebrow){font-size:13px;line-height:1.8;color:#dbe6ef}
+.intro-content>.primary-button{margin:18px auto 0;justify-content:center;width:min(100%,260px)}
+.in-result .masthead{display:none}
+body.in-result{background:#091522}
+.result-screen{position:relative;isolation:isolate;min-height:100dvh;max-width:760px;padding:24px 18px 26px;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+.result-screen:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(#08132377,#091522 85%),url(../assets/img/moon-arena-mobile.webp) center top/cover;opacity:.7}
+.result-screen:after{content:"";position:absolute;z-index:-1;top:-5%;left:5%;right:5%;height:60%;background:radial-gradient(ellipse,#e9be4655,transparent 67%);pointer-events:none}
+.result-hero{width:100%;text-align:center}
+.result-hero>.eyebrow{font-size:10px;letter-spacing:.3em;color:#cdb47d}
+.result-emblem{position:relative;display:grid;place-items:center;width:54px;height:54px;margin:14px auto 0;border:2px solid #ebcf8c;transform:rotate(45deg);background:linear-gradient(135deg,#9e7836,#35281b);box-shadow:inset 0 0 0 3px #181713,0 0 25px #f5cd6355}
+.result-emblem>.ico{width:30px;height:30px;color:#ffe19a;transform:rotate(-45deg)}
+.result-screen h1{margin:14px 0 0;font:800 clamp(42px,13vw,76px)/1.15 var(--font-num);letter-spacing:.04em;color:#ffe499;text-shadow:0 3px #64451b,0 0 30px #ffe3a655}
+.result-outcome{display:block;font:400 18px/1.6 var(--font-title);color:#f6ddb1;letter-spacing:.18em}
+.result-stats{display:flex;justify-content:center;gap:32px;margin:16px 0 0;width:100%}
+.result-stats>div{display:grid;gap:2px;justify-items:center}
+.result-stats small{font-size:10px;color:#bdcbd5;line-height:1.6}
+.result-stats b{font:800 26px/1.3 var(--font-num);color:#f4e7c6}
+.result-stats b span{font-size:15px;color:#a3b1be}
+.result-screen .result-cards{width:min(100%,470px);gap:16px;margin:22px 0 14px;padding:0 5px;align-items:end}
+.result-card:nth-child(1){transform:rotate(-5deg)}
+.result-card:nth-child(3){transform:rotate(5deg)}
+.result-card[data-featured="true"]{transform:translateY(-8px) scale(1.04);z-index:2}
+.result-card[data-alive="false"] .kcard{filter:grayscale(.7) brightness(.65)}
+.result-screen .result-hp{margin-top:8px;font-size:13px;line-height:1.5;color:#bfd6d8}
+.result-screen #resultCopy{font-size:12px;line-height:1.8;color:#c7d6e2;max-width:100%;margin:0 0 14px}
+.result-screen .result-actions{width:min(100%,440px);display:grid;grid-template-columns:1fr;gap:10px;margin-top:auto}
+.result-actions>.primary-button{min-height:50px;font-size:16px}
+.result-actions>.subtle-button{min-height:46px;font-weight:900;color:#d6e5f2;border-color:#7b9cba;background:linear-gradient(#29425c,#152a3d);box-shadow:inset 0 1px #fff4,0 3px #02080e}
+.result-screen[data-outcome="lose"]:after{background:radial-gradient(ellipse,#556c9455,transparent 67%)}
+.result-screen[data-outcome="lose"] h1{color:#c3d5ef;text-shadow:0 3px #18263e,0 0 30px #79a1df33}
+.result-screen[data-outcome="lose"] .result-emblem{border-color:#7c95b6;background:linear-gradient(#36506d,#152338);box-shadow:inset 0 0 0 3px #091424}
+.result-screen[data-outcome="lose"] .result-emblem>.ico,.result-screen[data-outcome="lose"] .result-outcome{color:#b8c9e2}
+.result-screen[data-outcome="lose"] .result-card{transform:rotate(0)}
+@media(max-height:640px){.intro-content>h2{margin-bottom:12px}.intro-match{max-width:300px;margin-bottom:12px}.intro-match .kcard{width:min(100%,95px)}.result-screen{padding-top:15px}.result-emblem{width:40px;height:40px;margin-top:10px}.result-screen h1{margin-top:10px}.result-stats{margin-top:8px}.result-screen .result-cards{margin:16px 0 10px}}
+@media(max-width:350px){.battle-screen.mock-layout .special-panel{grid-template-columns:minmax(0,1fr) 126px;gap:5px}.special-info{gap:4px}.battle-screen.mock-layout .special-info>.skill-peek{padding:5px 6px}.battle-screen.mock-layout .gauge-panel{padding:5px 7px}.battle-screen.mock-layout .gauge-panel .gauge-title{font-size:13px}}
+@media(max-height:600px){.battle-screen.mock-layout .special-panel{min-height:48px;padding:0}}
