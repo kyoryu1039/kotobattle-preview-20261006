@@ -140,7 +140,7 @@
     root.querySelectorAll('.art-pic img').forEach(img => {
       const fallback = img.closest('.art-pic').nextElementSibling;
       fallback.hidden = !!img.naturalWidth;
-      img.onload = () => { fallback.hidden = true; };
+      img.onload = () => { img.closest('.art-pic').hidden = false; fallback.hidden = true; };
       img.onerror = () => {
         const pic = img.closest('.art-pic'), source = pic.querySelector('source');
         if (source) { source.remove(); img.src = img.getAttribute('src'); return; }
@@ -149,7 +149,7 @@
       if(img.hasAttribute('data-src')){
         const pic=img.closest('.art-pic');
         if(artObserver){deferredArt.add(pic);artObserver.observe(pic);}else loadPicture(pic);
-      }else if (img.complete && !img.naturalWidth) img.onerror();
+      }
     });
   }
 
