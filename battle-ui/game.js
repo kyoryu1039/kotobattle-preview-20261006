@@ -921,7 +921,6 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
     intro.hidden=true;
     const fronts=[...document.querySelectorAll('#allyCard .art-pic img,#enemyCard .art-pic img')];
     Promise.all(fronts.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true});}))).then(()=>{if(token===epoch&&screen==='battle')music();});
-    message(`対戦開始！ ${affinityText()}`,1400);
     await Promise.all(['allyCard','enemyCard'].map((id,i)=>animate($(id),[{opacity:0,transform:`translateX(${i?70:-70}px) rotate(${i?15:-15}deg)`},{opacity:1,transform:getComputedStyle($(id)).transform}],650,token)));
     if(token===epoch)beginInput();
   }
@@ -940,7 +939,7 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
   $('backToSetup').onclick=()=>{clean();phase='idle';showScreen('setup');renderSetup();};$('leaveBattle').onclick=()=>{if(!confirm('対戦を終了して編成に戻りますか？'))return;clean();phase='idle';showScreen('setup');renderSetup();};
   $('rulesButton').onclick=openRules;$('settingsButton').onclick=openSettings;$('battleSettingsButton').onclick=openSettings;
   $('battleHistoryButton').onclick=openHistory;
-  document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=()=>pick(b.dataset.hand));$('switchButton').onclick=()=>chooseSwitch();$('allySkillInfo').onclick=()=>{if(state&&phase==='input')openDetail(E.active(state,'A'));};$('skillButton').onclick=()=>{if(phase==='input'&&state.A.sp>=6){armed=!armed;tone();controls();message(armed?'必殺技 ON！ 次に勝つと発動':'必殺技 OFF',2800);}};
+  document.querySelectorAll('[data-hand]').forEach(b=>b.onclick=()=>pick(b.dataset.hand));$('switchButton').onclick=()=>chooseSwitch();$('allySkillInfo').onclick=()=>{if(state&&phase==='input')openDetail(E.active(state,'A'));};$('skillButton').onclick=()=>{if(phase==='input'&&state.A.sp>=6){armed=!armed;tone();controls();}};
   function openHistory(){openPanel('DUEL HISTORY',`<h2>対戦の履歴</h2><ul class="history-list">${log.slice().reverse().map(t=>`<li>${escape(t)}</li>`).join('')}</ul>`);}
   $('closeDialog').onclick=closePanel;
   $('panelDialog').addEventListener('cancel',e=>{if($('panelDialog').dataset.forced==='true')e.preventDefault();});
