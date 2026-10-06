@@ -69,45 +69,51 @@
 
   function battleMarkup() {
     const hand = (h, name, key) => `<button class="hand-btn" type="button" data-hand="${h}" aria-label="${name}を出す"><span class="hand-face">${icon('hand-' + h, 'hand-ico')}<span class="hand-name">${name}</span></span><kbd>${key}</kbd></button>`;
-    return `<div class="arena-bg" aria-hidden="true"></div>
-    <header class="battle-head">
+    return `<header class="battle-head">
       <button id="leaveBattle" class="metal-btn" type="button" aria-label="対戦をやめて編成に戻る">${icon('ui-back')}</button>
       <h1 class="battle-title">ことばバトル</h1>
       <div class="round-badge" aria-label="ラウンド"><small>ROUND</small><b id="roundLabel">01</b></div>
       <button id="battleSettingsButton" class="metal-btn" type="button" aria-label="設定と履歴">${icon('ui-gear')}</button>
     </header>
-    <div class="duel" id="duelStage">
-      <section class="side side-enemy" aria-label="相手">
+      <section class="side side-enemy battle-hud enemy-hud" aria-label="相手">
         <div class="side-info">
           <div class="hp-block" id="enemyHp"></div>
           <div class="stat-panel" id="enemyStats"></div>
           <div class="status-row" id="enemyStatus" aria-label="相手の状態"></div>
           <button class="skill-peek" id="enemySkillInfo" type="button" aria-label="相手のカードと必殺技の詳細を見る"><small>必殺技の詳細 ›</small><span>✦ <b id="enemySkillName">必殺技</b></span></button>
         </div>
-        <div class="card-slot enemy" id="enemyCard"></div>
       </section>
+    <div class="duel" id="duelStage" aria-label="対戦フィールド">
+      <div class="arena-bg" aria-hidden="true"></div>
+      <div class="summon-ring ring-enemy" aria-hidden="true"></div>
+      <div class="summon-ring ring-ally" aria-hidden="true"></div>
+      <div class="card-slot enemy" id="enemyCard"></div>
       <div class="vs-row" aria-hidden="false"><div class="vs-mark" aria-hidden="true">VS</div><div class="affinity" id="affinityNote"></div></div>
-      <section class="side side-ally" aria-label="あなた">
-        <div class="card-slot ally" id="allyCard"></div>
-        <div class="side-info">
-          <div class="hp-block" id="allyHp"></div>
-          <div class="stat-panel" id="allyStats"></div>
-          <div class="status-row" id="allyStatus" aria-label="あなたの状態"></div>
-          <button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る"><span>✦ <b id="allySkillName">必殺技</b></span><small>技を見る ›</small></button>
-          <div class="bench-panel"><span class="bench-label">控え</span><div class="bench" id="allyBench"></div>
-            <button id="switchButton" class="switch-btn" type="button" aria-label="カードを交代">${icon('ui-swap')}<span>交代</span></button></div>
-        </div>
-      </section>
+      <div class="card-slot ally" id="allyCard"></div>
       <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
       <div id="jankenReveal" class="janken-reveal" hidden></div>
       <div id="skillCutIn" class="skill-cutin" hidden></div>
       <div class="battle-message" id="battleMessage" role="status" aria-live="polite"></div>
     </div>
+      <section class="side side-ally battle-hud ally-hud" aria-label="あなた">
+        <div class="side-info">
+          <div class="hp-block" id="allyHp"></div>
+          <div class="stat-panel" id="allyStats"></div>
+          <div class="status-row" id="allyStatus" aria-label="あなたの状態"></div>
+        </div>
+      </section>
+          <div class="bench-panel"><span class="bench-label">控え</span><div class="bench" id="allyBench"></div>
+            <button id="switchButton" class="switch-btn" type="button" aria-label="カードを交代">${icon('ui-swap')}<span>交代</span></button></div>
     <section class="control-dock" aria-label="対戦操作">
-      <div class="dock-row">
+      <div class="special-panel">
         <button id="skillButton" class="gauge-panel" type="button" aria-pressed="false" aria-describedby="skillHint gaugeLabel">
-          <span class="gauge-copy"><span class="gauge-title" id="skillTitle">必殺技</span><small id="skillHint">ゲージをためる</small></span><span class="gauge-count" id="gaugeLabel"><b>0</b><small>/6</small></span><span class="gauge-pips" id="gaugeTrack" aria-hidden="true"></span>
+          <span class="special-icon" id="skillGlyph" aria-hidden="true">${icon('fx-copy')}</span>
+          <span class="gauge-copy"><span class="special-name"><span class="gauge-title" id="skillTitle">必殺技</span><b id="allySkillName">必殺技</b></span><small id="skillHint">ゲージをためる</small></span>
+          <span class="gauge-meter"><span class="gauge-count" id="gaugeLabel"><b>0</b><small>/6</small></span><span class="gauge-pips" id="gaugeTrack" aria-hidden="true"></span></span>
         </button>
+        <button class="skill-peek" id="allySkillInfo" type="button" aria-label="自分のカードと必殺技の詳細を見る">技を見る ›</button>
+      </div>
+      <div class="dock-row">
         <div class="timer-panel"><span id="inputHint">手を選ぶ</span><span class="timer-value" id="timerLabel">15<small>秒</small></span></div>
       </div>
       <div class="hands">${hand('G', 'グー', 1)}${hand('C', 'チョキ', 2)}${hand('P', 'パー', 3)}</div>
@@ -130,6 +136,7 @@
 
   // Battle view with keyed updates: a card's DOM is kept while it stays in play.
   function createBattleView(root, {onDetail = () => {}} = {}) {
+    root.classList.add('mock-layout');
     root.innerHTML = battleMarkup();
     const $ = id => root.querySelector('#' + id);
     const keys = {};
@@ -154,6 +161,10 @@
           <div class="hp-line"><span class="hp-num" aria-label="HP"><b class="hp-cur"></b><span class="hp-sep">/</span><span class="hp-max">${w.maxhp}</span></span>
           <span class="hp-bar" data-side="${n}"><i class="hp-ghost"></i><i class="hp-fill"></i></span></div>`;
         $(n+'SkillName').textContent=w.skill[0];
+        if (side === 'A') {
+          $('skillGlyph').innerHTML = icon(P.FAMILY[P.family(w.name)].icon);
+          root.style.setProperty('--ally-aura', w.color);
+        } else root.style.setProperty('--enemy-aura', w.color);
         instant = true;
       }
       const hp = $(n + 'Hp'), ratio = pct(w.hp, w.maxhp);

@@ -1,0 +1,219 @@
+@charset "UTF-8";
+/* Accepted mock: original collectible cards, a spatial arena and a clear
+   portrait-first flow. The engine and shared card faces remain independent. */
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+body{background:#09141f}
+.ambient{background:radial-gradient(ellipse at 50% 0,#17344a66,transparent 65%),#09141f}
+.masthead{max-width:1000px;padding:12px 18px;min-height:64px}
+.brand{font-size:22px;gap:10px;text-shadow:0 2px #000}
+.brand small{display:none}
+.brand-mark{width:30px;height:38px;font-size:19px}
+.masthead .text-button{font-size:12px;padding:6px}
+.masthead nav{gap:6px}
+.setup-screen{max-width:960px;padding:18px 18px 100px}
+.setup-screen .intro{align-items:center;gap:10px;margin-bottom:14px}
+.setup-title-row{display:flex;align-items:center;gap:12px}
+.setup-screen .intro h1{font-size:25px;line-height:1.3}
+.cpu-mode{font-size:11px;padding:6px 9px;border:1px solid #598dd399;border-radius:9px;background:#123056;color:#d9eaff;white-space:nowrap}
+.setup-screen .intro-copy{font-size:12px;line-height:1.6;color:#b8cbd4;margin-top:7px}
+.setup-screen #randomTeam{min-height:44px;padding:6px 10px;white-space:nowrap;font-size:12px}
+.setup-screen>.team-panel{position:static;padding:0;margin:0 0 16px;background:none;border:0;box-shadow:none;backdrop-filter:none}
+.setup-screen .team-slots{gap:18px;padding:0 5px}
+.setup-screen .team-slot,.setup-screen .team-slot.selected{height:auto;min-height:0;padding:24px 0 0;display:block;background:none;border:0;border-radius:10px;text-align:center;box-shadow:none}
+.setup-screen .team-slot .kcard{display:block}
+.setup-screen .slot-no{position:absolute;top:0;left:0;right:0;text-align:center;font:700 12px/1.4 var(--font-ui);color:#adc3d3}
+.setup-screen .team-slot.selected .slot-no{color:var(--gold)}
+.setup-screen .team-slot.selected .kcard{outline:2px solid #ffe37a;outline-offset:4px;border-radius:7%;box-shadow:0 0 19px #ffd04a4d}
+.setup-screen .cpu-note{display:block;margin-top:12px;color:#9bb5c3;font-size:11px;text-align:right;white-space:normal}
+.collection{border-top:1px solid #7796a333;padding-top:12px;scroll-margin-top:12px}
+.selection-target{margin:0 0 10px;padding:0;border:0;background:none;color:#9bb5c3;font-size:11px;line-height:1.6}
+.setup-screen .collection-heading{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:10px}
+.setup-screen .collection-heading h2{font-size:21px;margin:0}
+.setup-screen .collection-heading h2 span{font-size:24px;color:#f4d16c}
+.setup-screen .search-box{width:100%;padding:0 12px;border-color:#5f809466;background:#122331a6;border-radius:8px}
+.setup-screen .search-box input{height:44px;font-size:14px}
+.setup-screen .filters{gap:8px;padding:1px 1px 12px;scrollbar-width:none}
+.setup-screen .filters::-webkit-scrollbar{display:none}
+.setup-screen .filter{min-height:36px;padding:7px 11px;border-radius:7px;font-size:12px;background:#0c1b28;border-color:#57718380}
+.setup-screen .filter.active{background:linear-gradient(#ffe991,#e7bd50);color:#281c08;border-color:#ffe991}
+.setup-screen .word-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 14px;padding:4px 5px}
+.word-entry{isolation:isolate}
+.setup-screen .chosen-badge{left:auto;right:6px;top:28%;display:grid;place-items:center;width:24px;height:24px;padding:0;border-radius:50%;border:1px solid #fff0a0;background:#ffdb69;color:#251b06;font-size:17px;box-shadow:0 2px 5px #0008}
+.setup-screen .word-more{position:absolute;right:6px;bottom:27%;z-index:5;width:30px;min-width:30px;min-height:30px;padding:0;display:grid;place-items:center;border-radius:50%;background:#08121be8;border:1px solid #c4dce588;font-size:20px;box-shadow:0 2px 6px #0009}
+.setup-screen .word-pick .kcard-move{padding-right:3cqw}
+.setup-screen .word-pick .kcard-move b{font-size:min(7.5cqw,13px)}
+.setup-dock{background:linear-gradient(#102432f2,#07131ffa);padding:10px 16px max(12px,env(safe-area-inset-bottom));border-color:#a5b8c444}
+.setup-dock .match-summary{display:none}
+.setup-dock>.primary-button{width:min(100%,560px);max-width:560px;min-height:50px;font-size:19px}
+
+/* The stage alone supplies perspective; HUD and controls stay on quiet panels. */
+body .battle-screen.mock-layout{--ally-aura:#c244ee;--enemy-aura:#4789ff;max-width:960px;height:100dvh;min-height:600px;padding:0 12px max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:5px;background:#091522;overflow:hidden}
+.battle-screen.mock-layout .battle-head{height:49px;min-height:49px;padding-top:max(3px,env(safe-area-inset-top));grid-template-columns:40px minmax(0,1fr) 70px 40px;gap:5px}
+.battle-screen.mock-layout .metal-btn{width:38px;height:38px}
+.battle-screen.mock-layout .battle-title{font-size:clamp(18px,5vw,25px)}
+.battle-screen.mock-layout .round-badge{height:34px;display:flex;gap:5px;padding:0 7px}
+.battle-screen.mock-layout .round-badge small{font-size:10px}
+.battle-screen.mock-layout .round-badge b{font-size:24px}
+.battle-screen.mock-layout .battle-hud.side{flex:0 0 auto;display:block;position:relative;width:100%;max-width:none;align-self:stretch;margin:0;padding:7px 10px;background:linear-gradient(110deg,#101f31f5,#091422f2);border:1px solid #6885a855;border-radius:9px;z-index:4}
+.battle-screen.mock-layout .battle-hud.side .side-info{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:3px 9px;padding:0;background:none;border:0;box-shadow:none}
+.battle-screen.mock-layout .battle-hud .hp-block{display:contents}
+.battle-screen.mock-layout .battle-hud .hp-head{position:static;grid-column:1/-1;height:20px;gap:7px;min-height:0;margin:0;flex-wrap:nowrap}
+.battle-screen.mock-layout .battle-hud .hp-name{flex:1 1 auto;font-size:13px;line-height:1.3;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.battle-screen.mock-layout .battle-hud .owner-tag{font-size:12px;padding:3px 7px}
+.battle-screen.mock-layout .battle-hud .hp-line{display:flex;grid-column:1;flex-direction:row;align-items:center;gap:8px;margin:0;min-width:0}
+.battle-screen.mock-layout .hp-cur{font-size:27px}
+.battle-screen.mock-layout .hp-sep,.battle-screen.mock-layout .hp-max{font-size:16px}
+.battle-screen.mock-layout .hp-num{gap:3px;flex:0 0 auto}
+.battle-screen.mock-layout .hp-bar{height:12px;min-width:30px;flex:1}
+.battle-screen.mock-layout .stat-panel{display:flex;align-items:center;gap:8px;padding:0;margin:0;background:none;border:0;box-shadow:none}
+.battle-screen.mock-layout .stat-row{display:flex;gap:3px;align-items:baseline;padding:0;min-width:0;height:auto}
+.battle-screen.mock-layout .stat-ico,.battle-screen.mock-layout .stat-bar{display:none}
+.battle-screen.mock-layout .stat-label{font-size:12px;white-space:nowrap;letter-spacing:-.06em}
+.battle-screen.mock-layout .stat-value{font:800 16px/1 var(--font-num);text-align:left}
+.battle-screen.mock-layout .stat-value small{font-size:11px}
+.battle-screen.mock-layout .stat-atk .stat-label{color:#ff9384}
+.battle-screen.mock-layout .stat-def .stat-label{color:#91c7ff}
+.battle-screen.mock-layout .stat-eva .stat-label{color:#9af0b0}
+.battle-screen.mock-layout .battle-hud .status-row{grid-column:1/-1;min-height:0;margin:0;padding:0;gap:3px}
+.battle-screen.mock-layout .battle-hud .status-row:empty{display:none}
+.battle-screen.mock-layout .status-chip{height:19px;font-size:11px}
+.battle-screen.mock-layout #enemySkillInfo{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);padding:0;border:0}
+.battle-screen.mock-layout #enemySkillInfo:focus-visible{position:fixed;top:55px;right:18px;width:auto;height:44px;clip-path:none;padding:8px;z-index:20}
+.battle-screen.mock-layout .duel{container-type:size;position:relative;flex:1 1 0;min-height:180px;display:block;margin:0 -12px;padding:0;isolation:isolate;overflow:visible}
+.battle-screen.mock-layout .arena-bg{position:absolute;inset:0;z-index:-2;filter:none;background:#152743 url(../assets/img/moon-arena.png) center 20%/cover no-repeat}
+.battle-screen.mock-layout .arena-bg:after{background:linear-gradient(#050d2638,transparent 25%,transparent 75%,#081625b3),radial-gradient(ellipse at 50% 40%,transparent 40%,#03091c55)}
+.battle-screen.mock-layout .card-slot{position:absolute;margin:0;z-index:3;will-change:transform}
+.battle-screen.mock-layout .card-slot.enemy{top:10%;right:8%;width:min(31cqw,40cqh)}
+.battle-screen.mock-layout .card-slot.ally{bottom:8%;left:7%;width:min(43cqw,52cqh)}
+.battle-screen.mock-layout .card-slot.enemy .card-hit{transform:rotate(5deg)}
+.battle-screen.mock-layout .card-slot.ally .card-hit{transform:rotate(-6deg)}
+.battle-screen.mock-layout .card-slot .kcard-name b{font-size:min(9.1cqw,18px)}
+.battle-screen.mock-layout .card-slot .kcard-move b{font-size:min(7.6cqw,14px)}
+.summon-ring{position:absolute;z-index:-1;border:2px solid color-mix(in srgb,var(--aura) 70%,#fff);border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--aura) 34%,transparent),transparent 70%);box-shadow:0 0 15px var(--aura),inset 0 0 13px var(--aura);pointer-events:none}
+.summon-ring:before,.summon-ring:after{content:"";position:absolute;inset:-7px;border:1px dashed color-mix(in srgb,var(--aura) 70%,#fff);border-radius:50%}
+.summon-ring:after{inset:5px;border-style:solid;opacity:.55}
+.ring-ally{--aura:var(--ally-aura);left:3%;bottom:5%;width:50%;height:10%}
+.ring-enemy{--aura:var(--enemy-aura);right:4%;top:calc(10% + min(46.75cqw,60.3cqh) - 8px);width:39%;height:8%}
+.battle-screen.mock-layout .vs-row{position:absolute;right:6%;bottom:17%;height:auto;margin:0;z-index:4;display:block}
+.battle-screen.mock-layout .vs-mark,.battle-screen.mock-layout .aff-direction{display:none}
+.battle-screen.mock-layout .affinity{height:32px;min-width:0;padding:4px 9px;clip-path:none;border:1px solid #cddfac99;border-radius:7px;background:#0c1e35e8;box-shadow:0 3px 10px #0009;font-size:12px;gap:6px}
+.battle-screen.mock-layout .affinity[data-tone="good"]{border-color:#ffe086;color:#fff0ae}
+.battle-screen.mock-layout .affinity[data-tone="bad"]{border-color:#9cbff4;color:#c8e4ff}
+.battle-screen.mock-layout .aff-mult{font-size:24px}
+.battle-screen.mock-layout>.bench-panel{display:flex;align-items:center;gap:12px;padding:7px 12px;min-height:70px;flex:0 0 auto;border:1px solid #6789a966;border-radius:8px;background:#0e2232;box-shadow:inset 0 1px 0 #bed6ef15}
+.battle-screen.mock-layout .bench-label{position:static;width:auto;text-align:left;font-size:13px;line-height:1.2;flex:0 0 auto}
+.battle-screen.mock-layout .bench{display:flex;justify-content:center;flex:1;gap:16px;min-height:0;padding:2px 5px 6px}
+.battle-screen.mock-layout .mini{--mini-w:54px}
+.battle-screen.mock-layout .switch-btn{width:66px;min-width:44px;min-height:48px;padding:0;align-self:stretch;font-size:13px}
+.battle-screen.mock-layout .switch-btn .ico{width:23px;height:23px}
+.battle-screen.mock-layout .control-dock{position:static;flex:0 0 auto;width:100%;max-width:none;padding:0;margin:0;gap:5px;border:0;background:none;box-shadow:none}
+.special-panel{display:flex;align-items:stretch;min-height:64px;border:1px solid #7399b5;border-radius:9px;background:linear-gradient(130deg,#193145,#0a1725);box-shadow:inset 0 1px #bad6ef26}
+.battle-screen.mock-layout .gauge-panel{position:relative;display:flex;flex:1;gap:8px;min-width:0;padding:6px 8px;background:transparent;border:0;box-shadow:none;border-radius:8px;color:#eef5ff;opacity:1;text-align:left}
+.battle-screen.mock-layout .gauge-panel:disabled{opacity:1}
+.special-icon{display:grid;place-items:center;flex:0 0 auto;width:34px;height:38px;color:#df8cff;border:1px solid #db96ee;border-radius:7px;background:linear-gradient(140deg,#371242,#13253d);box-shadow:inset 0 0 9px #bd63ea3a}
+.special-icon .ico{width:25px;height:25px}
+.battle-screen.mock-layout .gauge-copy{flex:1;min-width:0;gap:4px}
+.special-name{display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap;line-height:1.1}
+.battle-screen.mock-layout .gauge-title{font-size:12px;line-height:1.2;color:#ecb4ff;white-space:nowrap}
+#allySkillName{font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.battle-screen.mock-layout #skillHint{font-size:11px;line-height:1.3;color:#d2e3ee;white-space:normal}
+.gauge-meter{display:flex;flex-direction:column;gap:5px;align-items:center;flex:0 0 auto}
+.battle-screen.mock-layout .gauge-count{line-height:1;white-space:nowrap}
+.battle-screen.mock-layout .gauge-count b{font-size:24px}
+.battle-screen.mock-layout .gauge-count small{font-size:15px}
+.battle-screen.mock-layout .gauge-pips{position:static;display:flex;gap:3px;flex:0 0 auto}
+.battle-screen.mock-layout .gauge-pips i{width:8px;height:8px;border-radius:50%;border:1px solid #6990ab;background:#233b4e;box-shadow:none}
+.battle-screen.mock-layout .gauge-pips i.on{background:#eed778;box-shadow:0 0 6px #eed77866}
+.battle-screen.mock-layout .special-panel>.skill-peek{display:flex;align-items:center;justify-content:center;align-self:center;flex:0 0 auto;width:auto;margin:0 8px 0 0;padding:8px;min-width:66px;min-height:44px;background:#0a1a2a;border:1px solid #789cbb88;border-radius:7px;font-size:12px;line-height:1.4;color:#e6f1fa}
+.battle-screen.mock-layout .special-panel>.skill-peek:disabled{opacity:.55}
+.battle-screen.mock-layout .gauge-panel[data-state="ready"]{background:linear-gradient(110deg,#fff5b526,transparent);box-shadow:inset 0 0 0 1px #f5d76f;animation:skill-ready 1.15s ease-in-out infinite}
+.battle-screen.mock-layout .gauge-panel[data-state="armed"]{background:linear-gradient(110deg,#876111,#352a14);box-shadow:inset 0 0 0 1px #ffe486}
+.battle-screen.mock-layout .gauge-panel[data-state="armed"] #skillHint{color:#fff0c2}
+.battle-screen.mock-layout .dock-row{display:block;height:26px;min-height:26px}
+.battle-screen.mock-layout .timer-panel{display:flex;height:100%;justify-content:center;gap:16px;padding:0 8px;background:#0b1a28;border:1px solid #7194b444;border-radius:6px;font-size:12px;box-shadow:none}
+.battle-screen.mock-layout .timer-value{font:800 23px/1 var(--font-num);color:var(--gold)}
+.battle-screen.mock-layout .timer-value small{font:700 12px/1 var(--font-ui)}
+.battle-screen.mock-layout .hands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;height:78px;margin:0}
+.battle-screen.mock-layout .hand-btn{height:100%;min-height:0;max-width:none}
+.battle-screen.mock-layout .hand-face{gap:2px;padding:4px;flex-direction:column}
+.battle-screen.mock-layout .hand-ico{width:38px;height:38px}
+.battle-screen.mock-layout .hand-name{font-size:17px}
+.battle-screen.mock-layout .battle-message{max-width:92%;font-size:12px;line-height:1.5;white-space:normal;text-align:center}
+.battle-screen.mock-layout .skill-cutin,.battle-screen.mock-layout .janken-reveal{left:0;right:0}
+.battle-screen.mock-layout[data-phase="animating"] .battle-hud{opacity:.65;transition:opacity .2s}
+
+@media(max-width:600px){
+ .masthead{padding:10px 14px}.brand{font-size:19px}.brand-mark{width:27px;height:34px}
+ .setup-screen{padding:14px 14px 94px}.setup-screen .intro h1{font-size:22px}
+ .setup-title-row{gap:8px}.cpu-mode{font-size:10px;padding:5px 7px}
+ .setup-screen .intro-copy{font-size:11px}.setup-screen #randomTeam{font-size:11px;padding:5px 8px}
+ .setup-screen .team-slots{gap:14px}.setup-screen .word-grid{gap:16px 12px}
+ .setup-screen .team-slot .kcard-name b{font-size:10cqw}.setup-screen .team-slot .kcard-move b{font-size:8cqw}
+ .battle-screen.mock-layout .battle-hud.side .side-info{grid-template-columns:minmax(0,1fr);gap:3px}
+ .battle-screen.mock-layout .battle-hud .hp-head{grid-column:1;float:none}
+ .battle-screen.mock-layout .battle-hud .hp-line{grid-column:1}
+ .battle-screen.mock-layout .stat-panel{grid-column:1;justify-content:flex-end;gap:14px;margin-top:-1px}
+ .battle-screen.mock-layout .stat-value{font-size:15px}
+ .battle-screen.mock-layout .battle-hud.side{padding:5px 9px}
+ .battle-screen.mock-layout .battle-hud .side-info{position:relative}
+ .battle-screen.mock-layout .battle-hud .hp-head{height:19px}
+ .battle-screen.mock-layout .battle-hud .hp-line{padding-right:0}
+ .battle-screen.mock-layout .hp-cur{font-size:24px}
+ .battle-screen.mock-layout .battle-hud .hp-bar{max-width:none}
+ .battle-screen.mock-layout .hp-name{font-size:12px}
+ .battle-screen.mock-layout .hp-max{font-size:15px}
+ .battle-screen.mock-layout .stat-panel{font-size:12px}
+ .battle-screen.mock-layout .hp-line .hp-bar{height:10px}
+ .battle-screen.mock-layout .duel{min-height:180px}
+ .battle-screen.mock-layout .affinity{height:29px;font-size:11px;padding:3px 7px;gap:4px}
+ .battle-screen.mock-layout .aff-mult{font-size:21px}
+ .battle-screen.mock-layout .card-slot.ally{left:7%;width:min(43cqw,52cqh)}
+ .battle-screen.mock-layout .gauge-panel{gap:6px;padding:5px 6px}
+ .special-icon{width:28px;height:34px}.special-icon .ico{width:22px;height:22px}
+ .special-name{gap:4px}.battle-screen.mock-layout .gauge-title{font-size:11px}
+ #allySkillName{font-size:13px}.battle-screen.mock-layout .special-panel>.skill-peek{font-size:11px;min-width:63px;padding:6px;margin-right:5px}
+ .battle-screen.mock-layout .gauge-pips{gap:2px}.battle-screen.mock-layout .gauge-pips i{width:7px;height:7px}
+}
+@media(max-height:740px){
+ body .battle-screen.mock-layout{gap:3px;padding-bottom:max(5px,env(safe-area-inset-bottom))}
+ .battle-screen.mock-layout .battle-head{height:44px;min-height:44px}
+ .battle-screen.mock-layout .battle-hud.side{padding:4px 8px}
+ .battle-screen.mock-layout>.bench-panel{min-height:54px;padding:4px 10px}
+ .battle-screen.mock-layout .mini{--mini-w:38px}.battle-screen.mock-layout .bench{padding:1px 4px 6px}
+ .battle-screen.mock-layout .switch-btn{min-height:44px;width:58px;gap:0}
+ .special-panel{min-height:55px}.battle-screen.mock-layout .special-icon{display:none}
+ .battle-screen.mock-layout .hands{height:65px}.battle-screen.mock-layout .hand-ico{width:29px;height:29px}
+ .battle-screen.mock-layout .hand-name{font-size:15px}.battle-screen.mock-layout .dock-row{height:23px;min-height:23px}
+ .battle-screen.mock-layout .hp-cur{font-size:22px}.battle-screen.mock-layout .stat-panel{gap:10px}
+ .battle-screen.mock-layout .battle-hud .hp-head{height:18px}
+ .battle-screen.mock-layout .duel{min-height:160px}
+}
+@media(min-width:700px){
+ .setup-screen .team-slots{max-width:620px;margin:auto;gap:26px}
+ .setup-screen .word-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:25px 20px}
+ .setup-screen .collection-heading{flex-direction:row;align-items:center}.setup-screen .search-box{width:320px}
+ .setup-screen .team-slot .kcard-name b{font-size:17px}
+ .battle-screen.mock-layout .battle-head{height:58px;min-height:58px}
+ .battle-screen.mock-layout .battle-hud.side{padding:8px 15px}
+ .battle-screen.mock-layout .hp-head{height:22px}.battle-screen.mock-layout .hp-name{font-size:16px}
+ .battle-screen.mock-layout .hp-cur{font-size:31px}.battle-screen.mock-layout .hp-bar{max-width:360px}
+ .battle-screen.mock-layout .stat-panel{gap:20px}.battle-screen.mock-layout .stat-value{font-size:20px}
+ .battle-screen.mock-layout .stat-label{font-size:14px}
+ .battle-screen.mock-layout .card-slot.ally{left:15%;width:min(31cqw,51cqh)}
+ .battle-screen.mock-layout .card-slot.enemy{right:15%;width:min(22cqw,38cqh)}
+ .ring-ally{left:10%;width:39%}.ring-enemy{right:10%;width:31%;top:calc(10% + min(33.2cqw,57.3cqh) - 8px)}
+ .battle-screen.mock-layout .vs-row{right:19%;bottom:17%}
+ .battle-screen.mock-layout .control-dock{max-width:680px;align-self:center}
+ .battle-screen.mock-layout>.bench-panel{width:100%;max-width:680px;align-self:center}
+ .battle-screen.mock-layout .hands{height:86px}.battle-screen.mock-layout .hand-ico{width:42px;height:42px}
+ .special-name #allySkillName{font-size:17px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .summon-ring{animation:arena-breathe 3.6s ease-in-out infinite alternate}
+ .ring-enemy{animation-delay:-1.8s}
+ .word-pick{transition:transform .15s ease}
+ .word-pick:hover{transform:translateY(-3px)}
+}
+@keyframes arena-breathe{from{opacity:.6;filter:brightness(.85)}to{opacity:1;filter:brightness(1.2)}}
+body.motion-reduced .summon-ring{animation:none}
+@media(prefers-reduced-motion:reduce){.summon-ring,.battle-screen.mock-layout .gauge-panel{animation:none!important}}

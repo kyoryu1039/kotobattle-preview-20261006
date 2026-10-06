@@ -7,32 +7,33 @@
   <meta name="theme-color" content="#0b171b">
   <link rel="icon" href="data:,">
   <title>ことばバトル — WORD DUEL</title>
-  <link rel="stylesheet" href="battle-ui/styles/tokens.css">
-  <link rel="stylesheet" href="battle-ui/ui.css">
-  <link rel="stylesheet" href="battle-ui/styles/cards.css">
-  <link rel="stylesheet" href="battle-ui/styles/battle.css">
-  <script defer src="battle-ui/data.js"></script>
-  <script defer src="battle-ui/engine.js"></script>
-  <script defer src="battle-ui/presentation.js"></script>
-  <script defer src="battle-ui/view.js"></script>
-  <script defer src="battle-ui/effects.js"></script>
-  <script defer src="battle-ui/app.js"></script>
+  <link rel="stylesheet" href="battle-ui/styles/tokens.css?v=20261006-moon">
+  <link rel="stylesheet" href="battle-ui/ui.css?v=20261006-moon">
+  <link rel="stylesheet" href="battle-ui/styles/cards.css?v=20261006-moon">
+  <link rel="stylesheet" href="battle-ui/styles/battle.css?v=20261006-moon">
+  <link rel="stylesheet" href="battle-ui/styles/mockup.css?v=20261006-moon">
+  <script defer src="battle-ui/data.js?v=20261006-moon"></script>
+  <script defer src="battle-ui/engine.js?v=20261006-moon"></script>
+  <script defer src="battle-ui/presentation.js?v=20261006-moon"></script>
+  <script defer src="battle-ui/view.js?v=20261006-moon"></script>
+  <script defer src="battle-ui/effects.js?v=20261006-moon"></script>
+  <script defer src="battle-ui/app.js?v=20261006-moon"></script>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"></div>
   <header class="masthead">
-    <a class="brand" href="kotobattle-next.html" aria-label="ことばアーケードに戻る"><span class="brand-mark">言</span><span>ことばバトル<small>カード × じゃんけん</small></span></a>
+    <a class="brand" href="index.html" aria-label="ことばアーケードに戻る"><span class="brand-mark">言</span><span>ことばバトル<small>カード × じゃんけん</small></span></a>
     <nav><button class="text-button" id="rulesButton">遊び方</button><button class="icon-button" id="settingsButton" aria-label="音と演出の設定">⚙</button></nav>
   </header>
   <main>
     <section id="setupScreen" class="setup-screen">
-      <div class="intro"><div><p class="eyebrow">TEAM SETUP</p><h1>チーム編成</h1><p class="intro-copy">3枚を選ぶ。左のカードからフィールドへ。</p></div><div class="cpu-note"><span class="owner-tag cpu">CPU</span><b>相手は毎回ランダム</b></div></div>
-      <section class="team-panel" data-side="A" aria-labelledby="teamHeading"><div class="section-label"><h2 id="teamHeading"><span class="owner-tag you">YOU</span>あなたの3枚</h2><button id="randomTeam" class="subtle-button" type="button">↻ 3枚おまかせ</button></div><div id="teamSlots" class="team-slots"></div><p class="team-help">変更したい枠をタップ → 下のカードをタップ</p></section>
-      <section class="collection" aria-labelledby="collectionHeading"><p id="selectionTarget" class="selection-target" role="status">1枚目にセットするカードを選ぶ</p><div class="collection-heading"><div><p class="eyebrow">ALL CARDS</p><h2 id="collectionHeading">カード一覧 <span>32</span></h2></div><label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="ことばを探す" aria-label="ことばを検索"></label></div><div id="typeFilters" class="filters" aria-label="タイプで絞り込む"></div><div id="wordGrid" class="word-grid"></div><p id="emptySearch" class="empty-search" hidden>そのことばは見つかりませんでした。</p></section>
+      <div class="intro"><div><div class="setup-title-row"><h1>チーム編成</h1><span class="cpu-mode">CPU対戦</span></div><p class="intro-copy">入れ替える枠を選び、カードをタップ</p></div><button id="randomTeam" class="subtle-button" type="button">↝ おまかせ</button></div>
+      <section class="team-panel" data-side="A" aria-labelledby="teamHeading"><h2 id="teamHeading" class="sr-only">あなたの3枚</h2><div id="teamSlots" class="team-slots"></div><p class="cpu-note sr-only">相手は毎回ランダム</p></section>
+      <section class="collection" aria-labelledby="collectionHeading"><p id="selectionTarget" class="selection-target sr-only" role="status">1枚目にセットするカードを選ぶ</p><div class="collection-heading"><h2 id="collectionHeading">カード一覧 <span>32枚</span></h2><label class="search-box"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="ことばを探す" aria-label="ことばを検索"></label></div><div id="typeFilters" class="filters" aria-label="タイプで絞り込む"></div><div id="wordGrid" class="word-grid"></div><p id="emptySearch" class="empty-search" hidden>そのことばは見つかりませんでした。</p></section>
       <div class="setup-dock"><p class="match-summary"><span>あなたの3枚</span><b>VS</b><span>ランダムCPU</span></p><button id="startBattle" class="primary-button">この3枚で対戦 <span>↗</span></button></div>
     </section>
     <section id="battleScreen" class="battle-screen" hidden></section>
-    <section id="resultScreen" class="result-screen" hidden><p class="eyebrow">対戦結果</p><h1 id="resultTitle">YOU WIN</h1><p id="resultCopy"></p><div id="resultCards" class="result-cards"></div><div class="result-actions"><button id="rematchButton" class="primary-button">同じチームで再戦 ↗</button><button id="backToSetup" class="subtle-button">編成を変える</button><a href="kotobattle-next.html" class="text-button">アーケードへ</a></div></section>
+    <section id="resultScreen" class="result-screen" hidden><p class="eyebrow">対戦結果</p><h1 id="resultTitle">YOU WIN</h1><p id="resultCopy"></p><div id="resultCards" class="result-cards"></div><div class="result-actions"><button id="rematchButton" class="primary-button">同じチームで再戦 ↗</button><button id="backToSetup" class="subtle-button">編成を変える</button><a href="index.html" class="text-button">アーケードへ</a></div></section>
   </main>
   <dialog id="panelDialog" class="panel-dialog"><div class="dialog-head"><p class="eyebrow" id="dialogLabel"></p><button id="closeDialog" class="icon-button" aria-label="閉じる">×</button></div><div id="dialogContent"></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>

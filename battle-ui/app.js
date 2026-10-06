@@ -36,14 +36,14 @@
     storage.set('currentTeam',team);slot=(slot+1)%3;tone('place');renderSetup();
   }
   function renderSetup(){
-    const root=$('teamSlots');root.innerHTML=team.map((id,i)=>{const w=D.WORDS[id],selected=slot===i;return `<button class="team-slot ${selected?'selected':''}" data-slot="${i}" data-rank="${w.rank}" style="--type:${w.color}" aria-pressed="${selected}" aria-label="${i+1}枚目 ${escape(w.name)} を変更"><span class="slot-no">${i===0?'先頭':'控え '+i}</span><span class="slot-art">${V.picture(w)}</span><span class="slot-copy"><b>${escape(w.name)}</b><small>${escape(w.type)} · ${w.rank}</small></span></button>`;}).join('');
+    const root=$('teamSlots');root.innerHTML=team.map((id,i)=>{const w=D.WORDS[id],selected=slot===i;return `<button class="team-slot ${selected?'selected':''}" data-slot="${i}" data-rank="${w.rank}" style="--type:${w.color}" aria-pressed="${selected}" aria-label="${i+1}枚目 ${escape(w.name)} を変更"><span class="slot-no">${i===0?'先頭':'控え '+i}</span>${card(w)}</button>`;}).join('');
     root.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>selectSlot(+b.dataset.slot));imageFallbacks(root);
     $('selectionTarget').textContent=`${slot+1}枚目にセットするカードを選ぶ`;
     renderGrid();
   }
   function renderGrid(){
     const q=$('searchInput').value.trim(),kana=q.replace(/[ぁ-ん]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));const list=D.WORDS.filter(w=>(filter==='all'||w.type===filter)&&(!q||w.name.includes(q)||w.yomi.includes(kana)||w.skill[0].includes(q)));
-    $('wordGrid').innerHTML=list.map(w=>{const chosen=team.indexOf(w.id);return `<div class="word-entry ${chosen>=0?'in-team':''}" data-word="${w.id}"><button class="word-pick" data-pick="${w.id}" type="button" aria-label="${escape(w.name)}を${slot+1}枚目にセット">${card(w)}${chosen>=0?`<span class="chosen-badge">${chosen+1}枚目</span>`:''}</button><div class="entry-footer"><span>${escape(w.name)}</span><button class="word-more" data-detail="${w.id}" type="button" aria-label="${escape(w.name)}の詳細を見る">詳細</button></div></div>`;}).join('');
+    $('wordGrid').innerHTML=list.map(w=>{const chosen=team.indexOf(w.id);return `<div class="word-entry ${chosen>=0?'in-team':''}" data-word="${w.id}"><button class="word-pick" data-pick="${w.id}" type="button" aria-label="${escape(w.name)}を${slot+1}枚目にセット">${card(w)}${chosen>=0?`<span class="chosen-badge" aria-label="${chosen+1}枚目に編成中">✓</span>`:''}</button><button class="word-more" data-detail="${w.id}" type="button" aria-label="${escape(w.name)}の詳細を見る">ⓘ</button></div>`;}).join('');
     $('emptySearch').hidden=list.length>0;imageFallbacks($('wordGrid'));
     $('wordGrid').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>setWord(+b.dataset.pick));
     $('wordGrid').querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetail(D.WORDS[+b.dataset.detail],true));
