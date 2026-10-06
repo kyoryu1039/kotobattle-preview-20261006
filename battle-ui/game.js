@@ -1,3 +1,4 @@
+globalThis.KotoMobileAssetBytes=1129597;
 'use strict';
 (()=>{
 const IMG = {
@@ -225,7 +226,7 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
     const [fill, cx, cy] = ART[base] || [TARGET_FILL, .5, .5];
     const scale = Math.max(.92, Math.min(1.3, TARGET_FILL / fill));
     return {
-      mobile: `images/webp/${base}_mobile.webp`, webp: `images/webp/${base}.webp`, png: `images/webp/${base}.webp`,
+      mobile: globalThis.KotoMobileAssets?.[`images/webp/${base}_mobile.webp`]||`images/webp/${base}_mobile.webp`, webp: `images/webp/${base}.webp`, png: `images/webp/${base}.webp`,
       style: `--art-scale:${scale.toFixed(3)};--art-x:${((.5 - cx) * 100).toFixed(1)}%;--art-y:${((.5 - cy) * 100).toFixed(1)}%`
     };
   }
@@ -700,9 +701,22 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
   const assetLoads=new Map(),mobileArt=()=>matchMedia('(max-width:600px)').matches;
   const assetUrl=w=>KotoPresent.art(w)[mobileArt()?'mobile':'webp'];
   const materials=['moon-arena-preview.webp','arena-hud-plate.webp','arena-card-podium.webp','mosaic.png','sparkle.png'].map(n=>'battle-ui/assets/img/'+n);
+  async function loadMobilePack(status){
+    if(!mobileArt()||globalThis.KotoMobileAssets)return;
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+    try{
+      const response=await fetch('battle-ui/mobile-assets.json?v=20261007-pack1',{priority:'high',signal:controller.signal});if(!response.ok)throw Error('Asset pack failed');
+      const reader=response.body.getReader(),decoder=new TextDecoder();let text='',bytes=0;
+      while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;text+=decoder.decode(value,{stream:true});status.textContent=`カード素材を読み込み中 ${Math.min(99,Math.round(bytes/globalThis.KotoMobileAssetBytes*100))}%`;}
+      reader.releaseLock();
+      text+=decoder.decode();globalThis.KotoMobileAssets=JSON.parse(text);
+      for(const [url,data] of Object.entries(KotoMobileAssets))if(url.startsWith('battle-ui/assets/img/'))document.documentElement.style.setProperty('--asset-'+url.split('/').pop().replace(/\.(webp|png)$/,''),`url("${data}")`);
+    }finally{clearTimeout(timer);}
+  }
   function loadAsset(url,priority='high'){
     if(assetLoads.has(url))return assetLoads.get(url);
-    const preload=[...document.querySelectorAll('link[rel="preload"][as="image"]')].find(l=>l.getAttribute('href')===url&&(!l.media||matchMedia(l.media).matches));
+    const mapped=globalThis.KotoMobileAssets?.[url];
+    const preload=mapped?null:[...document.querySelectorAll('link[rel="preload"][as="image"]')].find(l=>l.getAttribute('href')===url&&(!l.media||matchMedia(l.media).matches));
     const promise=new Promise((resolve,reject)=>{
       if(preload){
         if(preload.dataset.loaded==='true'){resolve();return;}
@@ -711,7 +725,7 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
         preload.addEventListener('load',()=>{clearTimeout(t);resolve();},{once:true});preload.addEventListener('error',()=>{clearTimeout(t);reject(Error('Preload failed'));},{once:true});return;
       }
       const img=new Image(),timer=setTimeout(()=>reject(Error('Image load timeout')),30000);
-      img.fetchPriority=priority;img.onload=()=>{clearTimeout(timer);img.decode().catch(()=>{}).then(resolve);};img.onerror=()=>{clearTimeout(timer);reject(Error('Image load failed'));};img.src=url;
+      img.fetchPriority=priority;img.onload=()=>{clearTimeout(timer);img.decode().catch(()=>{}).then(resolve);};img.onerror=()=>{clearTimeout(timer);reject(Error('Image load failed'));};img.src=mapped||url;
     }).catch(e=>{assetLoads.delete(url);throw e;});
     assetLoads.set(url,promise);return promise;
   }
@@ -725,6 +739,8 @@ globalThis.KotoData={WORDS,TYPES_RING,COLORS,typeMult,makeWordObject};
     retry.hidden=true;
     try{
       await Promise.all([...document.querySelectorAll('link[data-game-style]')].map(link=>link.dataset.loaded==='true'?Promise.resolve():new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(Error('Style load timeout')),12000);link.addEventListener('load',()=>{clearTimeout(t);resolve();},{once:true});link.addEventListener('error',()=>{clearTimeout(t);reject(Error('Style load failed'));},{once:true});})));
+      await loadMobilePack(status);
+      document.querySelectorAll('link[data-game-style]').forEach(link=>link.media='all');
       if(!$('wordGrid').childElementCount){filters();renderSetup();}
       await new Promise(r=>requestAnimationFrame(r));
       const visible=[...document.querySelectorAll('#setupScreen .art-pic')].filter(p=>p.getBoundingClientRect().top<innerHeight+50);
