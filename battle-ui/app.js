@@ -20,18 +20,18 @@
   const assetLoads=new Map(),mobileArt=()=>matchMedia('(max-width:600px)').matches;
   const assetUrl=w=>KotoPresent.art(w)[mobileArt()?'mobile':'webp'];
   const materials=['moon-arena-preview.webp','arena-hud-plate.webp','arena-card-podium.webp','mosaic.png','sparkle.png'].map(n=>'battle-ui/assets/img/'+n);
-  function loadAsset(url){
+  function loadAsset(url,priority='high'){
     if(assetLoads.has(url))return assetLoads.get(url);
     const preload=[...document.querySelectorAll('link[rel="preload"][as="image"]')].find(l=>l.getAttribute('href')===url&&(!l.media||matchMedia(l.media).matches));
     const promise=new Promise((resolve,reject)=>{
       if(preload){
         if(preload.dataset.loaded==='true'){resolve();return;}
         if(preload.dataset.failed==='true'){reject(Error('Preload failed'));return;}
-        const t=setTimeout(()=>reject(Error('Preload timeout')),12000);
+        const t=setTimeout(()=>reject(Error('Preload timeout')),30000);
         preload.addEventListener('load',()=>{clearTimeout(t);resolve();},{once:true});preload.addEventListener('error',()=>{clearTimeout(t);reject(Error('Preload failed'));},{once:true});return;
       }
-      const img=new Image(),timer=setTimeout(()=>reject(Error('Image load timeout')),12000);
-      img.fetchPriority='high';img.onload=()=>{clearTimeout(timer);img.decode().catch(()=>{}).then(resolve);};img.onerror=()=>{clearTimeout(timer);reject(Error('Image load failed'));};img.src=url;
+      const img=new Image(),timer=setTimeout(()=>reject(Error('Image load timeout')),30000);
+      img.fetchPriority=priority;img.onload=()=>{clearTimeout(timer);img.decode().catch(()=>{}).then(resolve);};img.onerror=()=>{clearTimeout(timer);reject(Error('Image load failed'));};img.src=url;
     }).catch(e=>{assetLoads.delete(url);throw e;});
     assetLoads.set(url,promise);return promise;
   }
@@ -52,6 +52,7 @@
       await prepareAssets([...materials,...art],(n,total)=>{status.textContent=`カードを準備中 ${Math.round(n/total*100)}%`;});
       await Promise.all(visible.map(p=>p.querySelector('img').decode().catch(()=>{})));
       cover.hidden=true;
+      loadAsset(`battle-ui/assets/img/${mobileArt()?'moon-arena-mobile.webp':'moon-arena.webp'}`,'low').catch(()=>{});
     }
     catch{status.textContent='読み込みが進まないため、もう一度お試しください';retry.hidden=false;retry.onclick=()=>location.reload();}
   }
